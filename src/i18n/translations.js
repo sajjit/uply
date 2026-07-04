@@ -1,0 +1,331 @@
+/* ============================================================
+   Uply — Translation dictionary
+   French is the primary/default language; English is the toggle target.
+   Add new keys here as new UI text is introduced — never hardcode
+   bilingual strings inline in components.
+   ============================================================ */
+
+export const translations = {
+  fr: {
+    // App-wide
+    appName: "Uply",
+    appTagline: "RÉAPPROVISIONNEMENT RESTAURANT",
+    loading: "Chargement…",
+    logout: "Déconnexion",
+    save: "Enregistrer",
+    cancel: "Annuler",
+    confirm: "Confirmer",
+    back: "Retour",
+    delete: "Supprimer",
+    edit: "Modifier",
+    continue: "Continuer",
+    add: "Ajouter",
+
+    // Login
+    emailLabel: "ADRESSE E-MAIL",
+    passwordLabel: "MOT DE PASSE",
+    loginButton: "Se connecter",
+    loginError: "Adresse e-mail ou mot de passe incorrect.",
+    loggingIn: "Connexion…",
+
+    // Client home
+    hello: "Bonjour 👋",
+    whatToDo: "Que souhaitez-vous faire ?",
+    newOrder: "Nouvelle commande",
+    newOrderDesc: "Parcourir le catalogue et commander",
+    myOrders: "Mes commandes",
+    totalOrders: "commande(s) au total",
+    clientSpace: "ESPACE CLIENT",
+
+    // Catalog
+    catalog: "Catalogue",
+    searchPlaceholder: "Rechercher un produit…",
+    allCategories: "Toutes",
+    noProductsFound: "Aucun produit trouvé",
+    canSuggestProduct: "Vous pouvez proposer un nouveau produit.",
+    cantFindProduct: "Je ne trouve pas mon produit",
+    viewCart: "Voir le panier",
+    outOfStock: "RUPTURE",
+    orderedTimes: "Commandé {count} fois",
+    lastOrder: "Dernière commande",
+
+    // Cart
+    cart: "Panier",
+    emptyCart: "Panier vide",
+    commentOptional: "Commentaire (facultatif)…",
+    generalComment: "COMMENTAIRE GÉNÉRAL",
+    generalCommentPlaceholder: "Une remarque pour toute la commande…",
+    placeOrder: "Valider la commande",
+
+    // Request product
+    suggestProduct: "Proposer un produit",
+    suggestProductDesc: "Ce produit sera envoyé à l'administrateur pour validation.",
+    productNameLabel: "NOM DU PRODUIT",
+    productNamePlaceholder: "Ex. Huile d'olive bio",
+    commentLabelOptional: "COMMENTAIRE (FACULTATIF)",
+    commentPlaceholderHelpful: "Précisions utiles…",
+    sendRequest: "Envoyer la demande",
+
+    // Orders list / detail
+    noOrdersYet: "Aucune commande",
+    orderDetail: "Détail commande",
+    products: "produit(s)",
+    reorder: "Recommander",
+    reorderThis: "Recommander cette commande",
+    expectedDelivery: "Livraison prévue",
+    generalCommentLabel: "Commentaire général :",
+    statusPending: "En attente",
+    statusPreparing: "En préparation",
+    statusDelivered: "Livrée",
+
+    // Notifications
+    notifications: "Notifications",
+    noNotifications: "Aucune notification",
+
+    // Admin
+    adminSpace: "Espace administrateur",
+    tabHome: "Accueil",
+    tabRestaurants: "Restaurants",
+    tabProducts: "Produits",
+    tabRequests: "Demandes",
+    tabOrders: "Commandes",
+    tabUsers: "Utilisateurs",
+    overview: "Vue d'ensemble",
+    statRestaurants: "RESTAURANTS",
+    statActiveProducts: "PRODUITS ACTIFS",
+    statOrdersInProgress: "COMMANDES EN COURS",
+    statRequestsToReview: "DEMANDES À VALIDER",
+    useTabsHint: "Utilisez les onglets ci-dessus pour gérer les restaurants, produits, commandes et utilisateurs.",
+
+    manageRestaurants: "Gestion des restaurants",
+    restaurantNamePlaceholder: "Nom du restaurant",
+    create: "Créer",
+
+    manageProducts: "Gestion des produits",
+    newProduct: "NOUVEAU PRODUIT",
+    productNameShort: "Nom",
+    category: "Catégorie",
+    unit: "Unité (kg, L…)",
+    supplier: "Fournisseur",
+    price: "Prix (€)",
+    addProduct: "Ajouter le produit",
+    importInvoice: "Importer une facture",
+    active: "Actif",
+    inactive: "Inactif",
+    confirmDeleteProduct: "Supprimer ce produit définitivement ?",
+
+    productRequests: "Demandes d'ajout de produit",
+    noRequests: "Aucune demande",
+    approve: "Valider",
+    decline: "Refuser",
+
+    allOrders: "Toutes les commandes",
+    noOrders: "Aucune commande",
+    setDeliveryDate: "Définir la date de livraison",
+    editDelivery: "Modifier la livraison",
+    deliveryWindowPlaceholder: "ex: 9h-11h",
+
+    users: "Utilisateurs",
+    inviteNotice: "L'invitation depuis l'application n'est pas encore activée. Pour créer un nouvel utilisateur pour le moment, ajoutez-le depuis le tableau de bord Supabase (Authentication → Users), puis assignez-lui un restaurant ci-dessous.",
+    existingUsers: "UTILISATEURS EXISTANTS",
+    unassigned: "Non assigné",
+
+    // Import invoice modal
+    importInvoiceTitle: "📄 Importer une facture",
+    importInvoiceDesc: "Saisissez les produits présents sur la facture papier. Vous pourrez vérifier les doublons à l'étape suivante.",
+    invoiceLineItems: "PRODUITS DE LA FACTURE",
+    addLine: "Ajouter une ligne",
+    invoiceNumberOptional: "N° de facture (facultatif)",
+    reviewTitle: "Vérification",
+    reviewDesc: "Certains produits existent déjà. Choisissez quoi faire pour chacun.",
+    alreadyExists: "Existe déjà",
+    update: "Mettre à jour",
+    ignore: "Ignorer",
+    createNew: "Créer nouveau",
+    newProductTag: "Nouveau produit",
+    confirmImport: "Confirmer l'import",
+    importing: "Importation…",
+
+    // Product detail modal (suppliers + price history)
+    productDetails: "Détails du produit",
+    suppliersSection: "FOURNISSEURS",
+    addSupplier: "Ajouter un fournisseur",
+    newSupplierPlaceholder: "Nom du nouveau fournisseur",
+    noSuppliersYet: "Aucun fournisseur associé",
+    priceHistorySection: "HISTORIQUE DES PRIX",
+    noPriceHistory: "Aucun changement de prix enregistré",
+    currentPrice: "Prix actuel",
+    viewDetails: "Détails",
+
+    // User creation (in-app)
+    createUser: "Créer un utilisateur",
+    userName: "Nom complet",
+    userEmail: "Adresse e-mail",
+    userPassword: "Mot de passe temporaire",
+    userRestaurant: "Restaurant",
+    creating: "Création…",
+    userCreated: "Utilisateur créé avec succès.",
+    userCreateError: "Erreur lors de la création :",
+  },
+
+  en: {
+    appName: "Uply",
+    appTagline: "RESTAURANT RESTOCKING",
+    loading: "Loading…",
+    logout: "Log out",
+    save: "Save",
+    cancel: "Cancel",
+    confirm: "Confirm",
+    back: "Back",
+    delete: "Delete",
+    edit: "Edit",
+    continue: "Continue",
+    add: "Add",
+
+    emailLabel: "EMAIL ADDRESS",
+    passwordLabel: "PASSWORD",
+    loginButton: "Log in",
+    loginError: "Incorrect email or password.",
+    loggingIn: "Logging in…",
+
+    hello: "Hello 👋",
+    whatToDo: "What would you like to do?",
+    newOrder: "New order",
+    newOrderDesc: "Browse the catalog and order",
+    myOrders: "My orders",
+    totalOrders: "total order(s)",
+    clientSpace: "CLIENT SPACE",
+
+    catalog: "Catalog",
+    searchPlaceholder: "Search for a product…",
+    allCategories: "All",
+    noProductsFound: "No products found",
+    canSuggestProduct: "You can suggest a new product.",
+    cantFindProduct: "I can't find my product",
+    viewCart: "View cart",
+    outOfStock: "OUT OF STOCK",
+    orderedTimes: "Ordered {count} times",
+    lastOrder: "Last order",
+
+    cart: "Cart",
+    emptyCart: "Cart is empty",
+    commentOptional: "Comment (optional)…",
+    generalComment: "GENERAL COMMENT",
+    generalCommentPlaceholder: "A note for the whole order…",
+    placeOrder: "Place order",
+
+    suggestProduct: "Suggest a product",
+    suggestProductDesc: "This product will be sent to the admin for approval.",
+    productNameLabel: "PRODUCT NAME",
+    productNamePlaceholder: "e.g. Organic olive oil",
+    commentLabelOptional: "COMMENT (OPTIONAL)",
+    commentPlaceholderHelpful: "Any helpful details…",
+    sendRequest: "Send request",
+
+    noOrdersYet: "No orders yet",
+    orderDetail: "Order detail",
+    products: "product(s)",
+    reorder: "Reorder",
+    reorderThis: "Reorder this order",
+    expectedDelivery: "Expected delivery",
+    generalCommentLabel: "General comment:",
+    statusPending: "Pending",
+    statusPreparing: "In progress",
+    statusDelivered: "Delivered",
+
+    notifications: "Notifications",
+    noNotifications: "No notifications",
+
+    adminSpace: "Admin space",
+    tabHome: "Home",
+    tabRestaurants: "Restaurants",
+    tabProducts: "Products",
+    tabRequests: "Requests",
+    tabOrders: "Orders",
+    tabUsers: "Users",
+    overview: "Overview",
+    statRestaurants: "RESTAURANTS",
+    statActiveProducts: "ACTIVE PRODUCTS",
+    statOrdersInProgress: "ORDERS IN PROGRESS",
+    statRequestsToReview: "REQUESTS TO REVIEW",
+    useTabsHint: "Use the tabs above to manage restaurants, products, orders and users.",
+
+    manageRestaurants: "Manage restaurants",
+    restaurantNamePlaceholder: "Restaurant name",
+    create: "Create",
+
+    manageProducts: "Manage products",
+    newProduct: "NEW PRODUCT",
+    productNameShort: "Name",
+    category: "Category",
+    unit: "Unit (kg, L…)",
+    supplier: "Supplier",
+    price: "Price (€)",
+    addProduct: "Add product",
+    importInvoice: "Import invoice",
+    active: "Active",
+    inactive: "Inactive",
+    confirmDeleteProduct: "Permanently delete this product?",
+
+    productRequests: "New product requests",
+    noRequests: "No requests",
+    approve: "Approve",
+    decline: "Decline",
+
+    allOrders: "All orders",
+    noOrders: "No orders",
+    setDeliveryDate: "Set delivery date",
+    editDelivery: "Edit delivery",
+    deliveryWindowPlaceholder: "e.g. 9-11am",
+
+    users: "Users",
+    inviteNotice: "In-app invitations aren't enabled yet. To create a new user for now, add them from the Supabase dashboard (Authentication → Users), then assign them a restaurant below.",
+    existingUsers: "EXISTING USERS",
+    unassigned: "Unassigned",
+
+    importInvoiceTitle: "📄 Import invoice",
+    importInvoiceDesc: "Type in the products from the paper invoice. You'll be able to review duplicates on the next step.",
+    invoiceLineItems: "INVOICE LINE ITEMS",
+    addLine: "Add a line",
+    invoiceNumberOptional: "Invoice number (optional)",
+    reviewTitle: "Review",
+    reviewDesc: "Some products already exist. Choose what to do for each.",
+    alreadyExists: "Already exists",
+    update: "Update",
+    ignore: "Ignore",
+    createNew: "Create new",
+    newProductTag: "New product",
+    confirmImport: "Confirm import",
+    importing: "Importing…",
+
+    productDetails: "Product details",
+    suppliersSection: "SUPPLIERS",
+    addSupplier: "Add a supplier",
+    newSupplierPlaceholder: "New supplier name",
+    noSuppliersYet: "No suppliers linked",
+    priceHistorySection: "PRICE HISTORY",
+    noPriceHistory: "No price changes recorded",
+    currentPrice: "Current price",
+    viewDetails: "Details",
+
+    createUser: "Create a user",
+    userName: "Full name",
+    userEmail: "Email address",
+    userPassword: "Temporary password",
+    userRestaurant: "Restaurant",
+    creating: "Creating…",
+    userCreated: "User created successfully.",
+    userCreateError: "Error creating user:",
+  },
+};
+
+export function translate(lang, key, vars) {
+  const dict = translations[lang] || translations.fr;
+  let str = dict[key] ?? translations.fr[key] ?? key;
+  if (vars) {
+    for (const [k, v] of Object.entries(vars)) {
+      str = str.replace(`{${k}}`, v);
+    }
+  }
+  return str;
+}
