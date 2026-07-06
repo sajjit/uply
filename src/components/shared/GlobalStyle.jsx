@@ -19,6 +19,12 @@ export default function GlobalStyle() {
       button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid #1FB9D6; outline-offset: 2px; }
       ::-webkit-scrollbar { width: 6px; height: 6px; }
       ::-webkit-scrollbar-thumb { background: #CBD3CB; border-radius: 4px; }
+
+      /* Responsive helpers — used by admin forms/rows so nothing gets cut off on mobile */
+      .uply-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+      @media (max-width: 520px) {
+        .uply-form-grid { grid-template-columns: 1fr; }
+      }
     `}</style>
   );
 }

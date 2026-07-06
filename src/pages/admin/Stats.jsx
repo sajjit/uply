@@ -32,16 +32,48 @@ export default function AdminStats() {
 
       <div className="uply-mono" style={{ fontSize: 11, color: '#576257', marginBottom: 10 }}>PRODUITS LES PLUS COMMANDÉS</div>
       {stats.topProducts.length === 0 ? (
-        <div style={{ color: '#8A938A', fontSize: 13, display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div style={{ color: '#8A938A', fontSize: 13, display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20 }}>
           <BarChart3 size={16} /> Pas encore de données
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 20 }}>
           {stats.topProducts.map((p, i) => (
             <div key={p.name} style={{ display: 'flex', alignItems: 'center', gap: 10, background: '#fff', border: '1px solid #E1E6E1', borderRadius: 8, padding: 10 }}>
               <div className="uply-mono" style={{ fontSize: 12, color: '#8A938A', width: 18 }}>#{i + 1}</div>
               <div style={{ flex: 1, fontSize: 13, fontWeight: 600 }}>{p.name}</div>
               <div className="uply-mono" style={{ fontSize: 11, color: '#1FB9D6' }}>{p.count}×</div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div className="uply-mono" style={{ fontSize: 11, color: '#576257', marginBottom: 10 }}>COMMANDES PAR RESTAURANT</div>
+      {(!stats.ordersByRestaurant || stats.ordersByRestaurant.length === 0) ? (
+        <div style={{ color: '#8A938A', fontSize: 13, display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20 }}>
+          <BarChart3 size={16} /> Pas encore de données
+        </div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 20 }}>
+          {stats.ordersByRestaurant.map((r) => (
+            <div key={r.name} style={{ display: 'flex', alignItems: 'center', gap: 10, background: '#fff', border: '1px solid #E1E6E1', borderRadius: 8, padding: 10 }}>
+              <div style={{ flex: 1, fontSize: 13, fontWeight: 600 }}>{r.name}</div>
+              <div className="uply-mono" style={{ fontSize: 11, color: '#1FB9D6' }}>{r.count} commande(s)</div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div className="uply-mono" style={{ fontSize: 11, color: '#576257', marginBottom: 10 }}>DÉPENSES PAR FOURNISSEUR</div>
+      {(!stats.spendBySupplier || stats.spendBySupplier.length === 0) ? (
+        <div style={{ color: '#8A938A', fontSize: 13, display: 'flex', alignItems: 'center', gap: 8 }}>
+          <BarChart3 size={16} /> Pas encore de données
+        </div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          {stats.spendBySupplier.map((s) => (
+            <div key={s.supplier} style={{ display: 'flex', alignItems: 'center', gap: 10, background: '#fff', border: '1px solid #E1E6E1', borderRadius: 8, padding: 10 }}>
+              <div style={{ flex: 1, fontSize: 13, fontWeight: 600 }}>{s.supplier}</div>
+              <div className="uply-mono" style={{ fontSize: 11, color: '#5A9C3E' }}>{s.total.toFixed(2)} €</div>
             </div>
           ))}
         </div>

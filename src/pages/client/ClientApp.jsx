@@ -9,6 +9,8 @@ import Cart from './Cart';
 import OrdersList from './Orders';
 import RequestProduct from './RequestProduct';
 import MyInvoices from './MyInvoices';
+import Favorites from './Favorites';
+import QuickOrder from './QuickOrder';
 
 export default function ClientApp({ profile, onLogout }) {
   const { t } = useLanguage();
@@ -103,10 +105,37 @@ export default function ClientApp({ profile, onLogout }) {
           onNewOrder={() => setTab('catalog')}
           onOrders={() => setTab('orders')}
           onInvoices={() => setTab('invoices')}
+          onFavorites={() => setTab('favorites')}
+          onQuickOrder={() => setTab('quickOrder')}
           onLogout={onLogout}
           ordersCount={orders.length}
           notifications={notifications}
           onOpenNotifications={() => setTab('notifications')}
+        />
+      )}
+      {tab === 'quickOrder' && (
+        <QuickOrder
+          products={products}
+          stats={stats}
+          onBack={() => setTab('home')}
+          onConfirm={(items) => {
+            setCart((prev) => {
+              const next = { ...prev };
+              for (const it of items) next[it.productId] = { qty: it.qty, comment: prev[it.productId]?.comment || '' };
+              return next;
+            });
+            setTab('cart');
+          }}
+        />
+      )}
+      {tab === 'favorites' && (
+        <Favorites
+          products={products}
+          favorites={favorites}
+          cart={cart}
+          setQty={setQty}
+          onToggleFav={toggleFav}
+          onBack={() => setTab('home')}
         />
       )}
       {tab === 'invoices' && <MyInvoices restaurantId={profile.restaurant_id} onBack={() => setTab('home')} />}

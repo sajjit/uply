@@ -90,7 +90,7 @@ export default function ImportInvoiceModal({ restaurants, products, onClose, onD
         </div>
         <div style={{ fontSize: 12, color: '#576257', marginBottom: 16 }}>{t('importInvoiceDesc')}</div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 8 }}>
+        <div className="uply-form-grid" style={{ marginBottom: 8 }}>
           <select value={restaurantId} onChange={(e) => setRestaurantId(e.target.value)} style={inputStyle}>
             {restaurants.map((r) => <option key={r.id} value={r.id}>{r.name}</option>)}
           </select>
@@ -106,11 +106,11 @@ export default function ImportInvoiceModal({ restaurants, products, onClose, onD
         <div className="uply-mono" style={{ fontSize: 11, color: '#576257', marginBottom: 8 }}>{t('invoiceLineItems')}</div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 12 }}>
           {rows.map((row, i) => (
-            <div key={i} style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-              <input placeholder={t('productNameShort')} value={row.name} onChange={(e) => updateRow(i, 'name', e.target.value)} style={{ ...inputStyle, flex: 2 }} />
-              <input placeholder={t('category')} value={row.category} onChange={(e) => updateRow(i, 'category', e.target.value)} style={{ ...inputStyle, flex: 1 }} />
-              <input placeholder={t('unit')} value={row.unit} onChange={(e) => updateRow(i, 'unit', e.target.value)} style={{ ...inputStyle, width: 60 }} />
-              <input placeholder={t('price')} type="number" value={row.price} onChange={(e) => updateRow(i, 'price', e.target.value)} style={{ ...inputStyle, width: 70 }} />
+            <div key={i} style={{ display: 'flex', flexWrap: 'wrap', gap: 6, alignItems: 'center' }}>
+              <input placeholder={t('productNameShort')} value={row.name} onChange={(e) => updateRow(i, 'name', e.target.value)} style={{ ...inputStyle, flex: '2 1 140px' }} />
+              <input placeholder={t('category')} value={row.category} onChange={(e) => updateRow(i, 'category', e.target.value)} style={{ ...inputStyle, flex: '1 1 90px' }} />
+              <input placeholder={t('unit')} value={row.unit} onChange={(e) => updateRow(i, 'unit', e.target.value)} style={{ ...inputStyle, flex: '0 1 60px' }} />
+              <input placeholder={t('price')} type="number" value={row.price} onChange={(e) => updateRow(i, 'price', e.target.value)} style={{ ...inputStyle, flex: '0 1 70px' }} />
               <button onClick={() => removeRow(i)} style={{ background: 'none', border: 'none', color: '#C0392B', padding: 4, flexShrink: 0 }}><Trash2 size={14} /></button>
             </div>
           ))}

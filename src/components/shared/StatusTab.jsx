@@ -1,17 +1,19 @@
 import React from 'react';
 import { useLanguage } from '../../i18n/LanguageContext';
 
-export const STATUS_FR_VALUES = ['En attente', 'En préparation', 'Livrée'];
+export const STATUS_FR_VALUES = ['En attente', 'En préparation', 'En livraison', 'Livrée'];
 
 const STATUS_COLOR = {
   'En attente': { bg: '#C9A227', fg: '#0D0F0D' },
   'En préparation': { bg: '#1FB9D6', fg: '#F7F9F7' },
+  'En livraison': { bg: '#9ADB3C', fg: '#0D0F0D' },
   'Livrée': { bg: '#5A9C3E', fg: '#F7F9F7' },
 };
 
 const STATUS_KEY = {
   'En attente': 'statusPending',
   'En préparation': 'statusPreparing',
+  'En livraison': 'statusOutForDelivery',
   'Livrée': 'statusDelivered',
 };
 

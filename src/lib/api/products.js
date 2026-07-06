@@ -45,9 +45,20 @@ export async function fetchSuppliers(restaurantId = null) {
   return { data: data || [], error };
 }
 
-export async function createSupplier(restaurantId, name) {
-  const { data, error } = await supabase.from('suppliers').insert({ restaurant_id: restaurantId, name }).select().single();
+export async function createSupplier(restaurantId, supplier) {
+  const payload = typeof supplier === 'string' ? { name: supplier } : supplier;
+  const { data, error } = await supabase.from('suppliers').insert({ restaurant_id: restaurantId, ...payload }).select().single();
   return { data, error };
+}
+
+export async function updateSupplier(id, updates) {
+  const { error } = await supabase.from('suppliers').update(updates).eq('id', id);
+  return { error };
+}
+
+export async function deleteSupplier(id) {
+  const { error } = await supabase.from('suppliers').delete().eq('id', id);
+  return { error };
 }
 
 export async function fetchProductSuppliers(productId) {

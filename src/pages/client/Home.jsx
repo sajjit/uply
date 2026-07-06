@@ -1,9 +1,9 @@
 import React from 'react';
-import { ChefHat, ClipboardList, Bell, FileText } from 'lucide-react';
+import { ChefHat, ClipboardList, Bell, FileText, Heart, Zap } from 'lucide-react';
 import { TopBar } from '../../components/shared';
 import { useLanguage } from '../../i18n/LanguageContext';
 
-export default function ClientHome({ restaurant, onNewOrder, onOrders, onInvoices, onLogout, ordersCount, notifications, onOpenNotifications }) {
+export default function ClientHome({ restaurant, onNewOrder, onOrders, onInvoices, onFavorites, onQuickOrder, onLogout, ordersCount, notifications, onOpenNotifications }) {
   const { t } = useLanguage();
   const unreadCount = (notifications || []).filter((n) => !n.read).length;
 
@@ -32,11 +32,27 @@ export default function ClientHome({ restaurant, onNewOrder, onOrders, onInvoice
           </div>
         </button>
 
+        <button onClick={onQuickOrder} style={{ width: '100%', textAlign: 'left', background: 'linear-gradient(135deg, #1FB9D6 0%, #9ADB3C 100%)', color: '#0D0F0D', border: 'none', borderRadius: 10, padding: 20, marginBottom: 14, display: 'flex', alignItems: 'center', gap: 14 }}>
+          <Zap size={28} />
+          <div>
+            <div className="uply-display" style={{ fontWeight: 700, fontSize: 16 }}>{t('quickOrder')}</div>
+            <div style={{ fontSize: 12, opacity: 0.75 }}>{t('quickOrderHomeDesc')}</div>
+          </div>
+        </button>
+
         <button onClick={onOrders} style={{ width: '100%', textAlign: 'left', background: '#fff', color: '#0D0F0D', border: '1.5px solid #0D0F0D', borderRadius: 10, padding: 20, display: 'flex', alignItems: 'center', gap: 14, marginBottom: 14 }}>
           <ClipboardList size={28} />
           <div>
             <div className="uply-display" style={{ fontWeight: 700, fontSize: 16 }}>{t('myOrders')}</div>
             <div style={{ fontSize: 12, opacity: 0.6 }}>{ordersCount} {t('totalOrders')}</div>
+          </div>
+        </button>
+
+        <button onClick={onFavorites} style={{ width: '100%', textAlign: 'left', background: '#fff', color: '#0D0F0D', border: '1.5px solid #0D0F0D', borderRadius: 10, padding: 20, display: 'flex', alignItems: 'center', gap: 14, marginBottom: 14 }}>
+          <Heart size={28} />
+          <div>
+            <div className="uply-display" style={{ fontWeight: 700, fontSize: 16 }}>{t('myFavorites')}</div>
+            <div style={{ fontSize: 12, opacity: 0.6 }}>{t('myFavoritesDesc')}</div>
           </div>
         </button>
 

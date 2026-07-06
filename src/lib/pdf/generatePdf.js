@@ -20,7 +20,7 @@ async function setupDoc() {
   return { pdfDoc, page, font, fontBold };
 }
 
-function drawHeader(page, font, fontBold, { docTitle, docNumber, dateLabel, restaurantName }) {
+function drawHeader(page, font, fontBold, { docTitle, docNumber, dateLabel, restaurant }) {
   let y = PAGE_HEIGHT - MARGIN;
 
   // Brand mark
@@ -41,9 +41,18 @@ function drawHeader(page, font, fontBold, { docTitle, docNumber, dateLabel, rest
 
   y -= 24;
   page.drawText('Restaurant', { x: MARGIN, y, size: 8, font, color: rgb(0.4, 0.4, 0.4) });
-  page.drawText(restaurantName, { x: MARGIN, y: y - 14, size: 12, font: fontBold, color: rgb(0.10, 0.11, 0.10) });
+  page.drawText(restaurant.name || '', { x: MARGIN, y: y - 14, size: 12, font: fontBold, color: rgb(0.10, 0.11, 0.10) });
+  let contactY = y - 28;
+  if (restaurant.address) {
+    page.drawText(restaurant.address, { x: MARGIN, y: contactY, size: 9, font, color: rgb(0.4, 0.4, 0.4) });
+    contactY -= 12;
+  }
+  if (restaurant.phone) {
+    page.drawText(restaurant.phone, { x: MARGIN, y: contactY, size: 9, font, color: rgb(0.4, 0.4, 0.4) });
+    contactY -= 12;
+  }
 
-  return y - 40;
+  return Math.min(y - 40, contactY - 14);
 }
 
 function drawLineItemsTable(page, font, fontBold, items, startY, { showPrice }) {
@@ -85,7 +94,7 @@ function drawLineItemsTable(page, font, fontBold, items, startY, { showPrice }) 
  * @param {object} order - order row with order_items, plus restaurant name, invoice number
  * @returns {Promise<Blob>}
  */
-export async function generateInvoicePdf(order, restaurantName) {
+export async function generateInvoicePdf(order, restaurant) {
   const { pdfDoc, page, font, fontBold } = await setupDoc();
 
   const dateLabel = `Date : ${new Date(order.created_at).toLocaleDateString('fr-FR')}`;
@@ -93,7 +102,7 @@ export async function generateInvoicePdf(order, restaurantName) {
     docTitle: 'FACTURE',
     docNumber: order.invoice_number || order.id.slice(0, 8).toUpperCase(),
     dateLabel,
-    restaurantName,
+    restaurant,
   });
 
   y -= 10;
@@ -124,7 +133,7 @@ export async function generateInvoicePdf(order, restaurantName) {
  * @param {object} order - order row with order_items
  * @returns {Promise<Blob>}
  */
-export async function generatePurchaseOrderPdf(order, restaurantName) {
+export async function generatePurchaseOrderPdf(order, restaurant) {
   const { pdfDoc, page, font, fontBold } = await setupDoc();
 
   const dateLabel = `Date : ${new Date(order.created_at).toLocaleDateString('fr-FR')}`;
@@ -132,7 +141,7 @@ export async function generatePurchaseOrderPdf(order, restaurantName) {
     docTitle: 'BON DE COMMANDE',
     docNumber: order.id.slice(0, 8).toUpperCase(),
     dateLabel,
-    restaurantName,
+    restaurant,
   });
 
   y -= 10;
@@ -151,6 +160,38 @@ export async function generatePurchaseOrderPdf(order, restaurantName) {
     page.drawText('Commentaire :', { x: MARGIN, y: finalY, size: 9, font: fontBold, color: rgb(0.3, 0.3, 0.3) });
     page.drawText(String(order.comment).slice(0, 90), { x: MARGIN, y: finalY - 14, size: 9, font, color: rgb(0.3, 0.3, 0.3) });
   }
+
+  page.drawText('Document généré automatiquement par Uply', { x: MARGIN, y: 40, size: 7, font, color: rgb(0.6, 0.6, 0.6) });
+
+  const bytes = await pdfDoc.save();
+  return new Blob([bytes], { type: 'application/pdf' });
+}
+
+/**
+ * Generates a delivery note (bon de livraison) PDF — handed to the driver /
+ * kept by the restaurant as proof of what was actually delivered, distinct
+ * from the purchase order (sent before delivery) and the invoice (with prices).
+ * @param {object} order - order row with order_items
+ * @returns {Promise<Blob>}
+ */
+export async function generateDeliveryNotePdf(order, restaurant) {
+  const { pdfDoc, page, font, fontBold } = await setupDoc();
+
+  const dateLabel = `Date : ${new Date(order.delivery_date || order.created_at).toLocaleDateString('fr-FR')}`;
+  let y = drawHeader(page, font, fontBold, {
+    docTitle: 'BON DE LIVRAISON',
+    docNumber: order.id.slice(0, 8).toUpperCase(),
+    dateLabel,
+    restaurant,
+  });
+
+  y -= 10;
+  const items = (order.order_items || []).map((it) => ({ name: it.name, qty: it.qty, unit: it.unit }));
+  const { y: afterTable } = drawLineItemsTable(page, font, fontBold, items, y, { showPrice: false });
+
+  let finalY = afterTable - 30;
+  page.drawText('Signature du destinataire :', { x: MARGIN, y: finalY, size: 9, font: fontBold, color: rgb(0.3, 0.3, 0.3) });
+  page.drawRectangle({ x: MARGIN, y: finalY - 70, width: 200, height: 60, borderColor: rgb(0.75, 0.75, 0.75), borderWidth: 1, color: rgb(1, 1, 1) });
 
   page.drawText('Document généré automatiquement par Uply', { x: MARGIN, y: 40, size: 7, font, color: rgb(0.6, 0.6, 0.6) });
 

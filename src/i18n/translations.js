@@ -36,6 +36,16 @@ export const translations = {
     myOrders: "Mes commandes",
     totalOrders: "commande(s) au total",
     clientSpace: "ESPACE CLIENT",
+    myFavorites: "Mes favoris",
+    myFavoritesDesc: "Vos produits préférés",
+    noFavoritesYet: "Aucun favori pour le moment",
+    noFavoritesDesc: "Appuyez sur le cœur d'un produit du catalogue pour l'ajouter ici.",
+    quickOrder: "Commande rapide",
+    quickOrderHomeDesc: "Votre commande habituelle en un clic",
+    quickOrderDesc: "Basé sur votre historique, voici vos produits habituels. Ajustez les quantités si besoin.",
+    noUsualOrderYet: "Pas encore d'historique",
+    noUsualOrderDesc: "Passez quelques commandes et vos produits habituels apparaîtront ici.",
+    addToCartAndReview: "Ajouter au panier ({count})",
 
     // Catalog
     catalog: "Catalogue",
@@ -48,6 +58,10 @@ export const translations = {
     outOfStock: "RUPTURE",
     orderedTimes: "Commandé {count} fois",
     lastOrder: "Dernière commande",
+    filterAll: "Tous",
+    filterFavorites: "Favoris",
+    filterMostOrdered: "Plus commandés",
+    filterRecent: "Récemment commandés",
 
     // Cart
     cart: "Panier",
@@ -56,6 +70,8 @@ export const translations = {
     generalComment: "COMMENTAIRE GÉNÉRAL",
     generalCommentPlaceholder: "Une remarque pour toute la commande…",
     placeOrder: "Valider la commande",
+    itemCount: "{count} article(s)",
+    total: "Total",
 
     // Request product
     suggestProduct: "Proposer un produit",
@@ -76,6 +92,7 @@ export const translations = {
     generalCommentLabel: "Commentaire général :",
     statusPending: "En attente",
     statusPreparing: "En préparation",
+    statusOutForDelivery: "En livraison",
     statusDelivered: "Livrée",
 
     // Notifications
@@ -87,6 +104,7 @@ export const translations = {
     tabHome: "Accueil",
     tabRestaurants: "Restaurants",
     tabProducts: "Produits",
+    tabSuppliers: "Fournisseurs",
     tabRequests: "Demandes",
     tabOrders: "Commandes",
     tabUsers: "Utilisateurs",
@@ -99,11 +117,14 @@ export const translations = {
 
     manageRestaurants: "Gestion des restaurants",
     restaurantNamePlaceholder: "Nom du restaurant",
+    restaurantAddress: "Adresse",
+    restaurantPhone: "Téléphone",
     create: "Créer",
 
     manageProducts: "Gestion des produits",
     newProduct: "NOUVEAU PRODUIT",
     productNameShort: "Nom",
+    brand: "Marque",
     category: "Catégorie",
     unit: "Unité (kg, L…)",
     supplier: "Fournisseur",
@@ -114,6 +135,16 @@ export const translations = {
     inactive: "Inactif",
     confirmDeleteProduct: "Supprimer ce produit définitivement ?",
 
+    manageSuppliers: "Gestion des fournisseurs",
+    newSupplier: "NOUVEAU FOURNISSEUR",
+    supplierNamePlaceholder: "Nom du fournisseur",
+    supplierPhone: "Téléphone",
+    supplierEmail: "E-mail",
+    supplierLeadTime: "Délai (jours)",
+    supplierDeliveryDays: "JOURS DE LIVRAISON",
+    leadTimeDays: "{count}j de délai",
+    confirmDeleteSupplier: "Supprimer ce fournisseur définitivement ?",
+
     productRequests: "Demandes d'ajout de produit",
     noRequests: "Aucune demande",
     approve: "Valider",
@@ -121,6 +152,9 @@ export const translations = {
 
     allOrders: "Toutes les commandes",
     noOrders: "Aucune commande",
+    filters: "FILTRES",
+    allRestaurants: "Tous les restaurants",
+    allStatuses: "Tous les statuts",
     setDeliveryDate: "Définir la date de livraison",
     editDelivery: "Modifier la livraison",
     deliveryWindowPlaceholder: "ex: 9h-11h",
@@ -195,6 +229,16 @@ export const translations = {
     myOrders: "My orders",
     totalOrders: "total order(s)",
     clientSpace: "CLIENT SPACE",
+    myFavorites: "My favorites",
+    myFavoritesDesc: "Your favorite products",
+    noFavoritesYet: "No favorites yet",
+    noFavoritesDesc: "Tap the heart on a product in the catalog to add it here.",
+    quickOrder: "Quick order",
+    quickOrderHomeDesc: "Your usual order in one tap",
+    quickOrderDesc: "Based on your history, here are your usual products. Adjust quantities if needed.",
+    noUsualOrderYet: "No order history yet",
+    noUsualOrderDesc: "Place a few orders and your usual products will show up here.",
+    addToCartAndReview: "Add to cart ({count})",
 
     catalog: "Catalog",
     searchPlaceholder: "Search for a product…",
@@ -206,6 +250,10 @@ export const translations = {
     outOfStock: "OUT OF STOCK",
     orderedTimes: "Ordered {count} times",
     lastOrder: "Last order",
+    filterAll: "All",
+    filterFavorites: "Favorites",
+    filterMostOrdered: "Most ordered",
+    filterRecent: "Recently ordered",
 
     cart: "Cart",
     emptyCart: "Cart is empty",
@@ -213,6 +261,8 @@ export const translations = {
     generalComment: "GENERAL COMMENT",
     generalCommentPlaceholder: "A note for the whole order…",
     placeOrder: "Place order",
+    itemCount: "{count} item(s)",
+    total: "Total",
 
     suggestProduct: "Suggest a product",
     suggestProductDesc: "This product will be sent to the admin for approval.",
@@ -231,6 +281,7 @@ export const translations = {
     generalCommentLabel: "General comment:",
     statusPending: "Pending",
     statusPreparing: "In progress",
+    statusOutForDelivery: "Out for delivery",
     statusDelivered: "Delivered",
 
     notifications: "Notifications",
@@ -240,6 +291,7 @@ export const translations = {
     tabHome: "Home",
     tabRestaurants: "Restaurants",
     tabProducts: "Products",
+    tabSuppliers: "Suppliers",
     tabRequests: "Requests",
     tabOrders: "Orders",
     tabUsers: "Users",
@@ -252,11 +304,14 @@ export const translations = {
 
     manageRestaurants: "Manage restaurants",
     restaurantNamePlaceholder: "Restaurant name",
+    restaurantAddress: "Address",
+    restaurantPhone: "Phone",
     create: "Create",
 
     manageProducts: "Manage products",
     newProduct: "NEW PRODUCT",
     productNameShort: "Name",
+    brand: "Brand",
     category: "Category",
     unit: "Unit (kg, L…)",
     supplier: "Supplier",
@@ -267,6 +322,16 @@ export const translations = {
     inactive: "Inactive",
     confirmDeleteProduct: "Permanently delete this product?",
 
+    manageSuppliers: "Manage suppliers",
+    newSupplier: "NEW SUPPLIER",
+    supplierNamePlaceholder: "Supplier name",
+    supplierPhone: "Phone",
+    supplierEmail: "Email",
+    supplierLeadTime: "Lead time (days)",
+    supplierDeliveryDays: "DELIVERY DAYS",
+    leadTimeDays: "{count}d lead time",
+    confirmDeleteSupplier: "Permanently delete this supplier?",
+
     productRequests: "New product requests",
     noRequests: "No requests",
     approve: "Approve",
@@ -274,6 +339,9 @@ export const translations = {
 
     allOrders: "All orders",
     noOrders: "No orders",
+    filters: "FILTERS",
+    allRestaurants: "All restaurants",
+    allStatuses: "All statuses",
     setDeliveryDate: "Set delivery date",
     editDelivery: "Edit delivery",
     deliveryWindowPlaceholder: "e.g. 9-11am",

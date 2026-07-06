@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
+import { Pencil } from 'lucide-react';
 import * as api from '../../lib/api';
-import { SectionHeader } from '../../components/shared';
+import { SectionHeader, inputStyle } from '../../components/shared';
 import { useLanguage } from '../../i18n/LanguageContext';
 
 export default function AdminRestaurants({ restaurants, products, users, onChange }) {
   const { t } = useLanguage();
   const [name, setName] = useState('');
   const [busy, setBusy] = useState(false);
+  const [editing, setEditing] = useState(null);
+  const [editForm, setEditForm] = useState({ address: '', phone: '' });
 
   async function add() {
     if (!name.trim()) return;
@@ -19,6 +22,17 @@ export default function AdminRestaurants({ restaurants, products, users, onChang
 
   async function remove(id) {
     await api.deleteRestaurant(id);
+    onChange();
+  }
+
+  function startEdit(r) {
+    setEditing(r.id);
+    setEditForm({ address: r.address || '', phone: r.phone || '' });
+  }
+
+  async function saveEdit() {
+    await api.updateRestaurant(editing, { address: editForm.address.trim() || null, phone: editForm.phone.trim() || null });
+    setEditing(null);
     onChange();
   }
 
@@ -40,13 +54,36 @@ export default function AdminRestaurants({ restaurants, products, users, onChang
         {restaurants.map((r) => {
           const productsCount = products.filter((p) => p.restaurant_id === r.id).length;
           const usersCount = users.filter((u) => u.restaurant_id === r.id).length;
+          if (editing === r.id) {
+            return (
+              <div key={r.id} style={{ background: '#EFFBE3', border: '1.5px solid #C9A227', borderRadius: 8, padding: 12 }}>
+                <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 8 }}>{r.name}</div>
+                <div className="uply-form-grid" style={{ marginBottom: 8 }}>
+                  <input placeholder={t('restaurantAddress')} value={editForm.address} onChange={(e) => setEditForm({ ...editForm, address: e.target.value })} style={inputStyle} />
+                  <input placeholder={t('restaurantPhone')} value={editForm.phone} onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })} style={inputStyle} />
+                </div>
+                <div style={{ display: 'flex', gap: 6 }}>
+                  <button onClick={saveEdit} style={{ flex: 1, background: '#5A9C3E', color: '#fff', border: 'none', borderRadius: 6, padding: 8, fontSize: 12, fontWeight: 600 }}>{t('save')}</button>
+                  <button onClick={() => setEditing(null)} style={{ flex: 1, background: '#fff', border: '1px solid #CBD3CB', borderRadius: 6, padding: 8, fontSize: 12 }}>{t('cancel')}</button>
+                </div>
+              </div>
+            );
+          }
           return (
-            <div key={r.id} style={{ background: '#fff', border: '1.5px solid #E1E6E1', borderRadius: 8, padding: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div>
+            <div key={r.id} style={{ background: '#fff', border: '1.5px solid #E1E6E1', borderRadius: 8, padding: 12, display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+              <div style={{ flex: '1 1 160px', minWidth: 0 }}>
                 <div style={{ fontWeight: 600, fontSize: 14 }}>{r.name}</div>
                 <div className="uply-mono" style={{ fontSize: 11, color: '#8A938A' }}>{productsCount} produits · {usersCount} utilisateurs</div>
+                {(r.address || r.phone) && (
+                  <div className="uply-mono" style={{ fontSize: 10, color: '#8A938A', marginTop: 2 }}>
+                    {r.address}{r.address && r.phone ? ' · ' : ''}{r.phone}
+                  </div>
+                )}
               </div>
-              <button onClick={() => remove(r.id)} style={{ background: 'none', border: 'none', color: '#C0392B', fontSize: 12 }}>{t('delete')}</button>
+              <div style={{ display: 'flex', gap: 6 }}>
+                <button onClick={() => startEdit(r)} title={t('edit')} style={{ background: 'none', border: '1px solid #CBD3CB', borderRadius: 4, padding: 6, color: '#0D0F0D' }}><Pencil size={13} /></button>
+                <button onClick={() => remove(r.id)} style={{ background: 'none', border: 'none', color: '#C0392B', fontSize: 12 }}>{t('delete')}</button>
+              </div>
             </div>
           );
         })}

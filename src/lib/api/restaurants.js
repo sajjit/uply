@@ -14,6 +14,11 @@ export async function createRestaurant(name) {
   return { data, error };
 }
 
+export async function updateRestaurant(id, updates) {
+  const { error } = await supabase.from('restaurants').update(updates).eq('id', id);
+  return { error };
+}
+
 export async function deleteRestaurant(id) {
   const { error } = await supabase.from('restaurants').delete().eq('id', id);
   return { error };

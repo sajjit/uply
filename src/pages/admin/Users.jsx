@@ -37,7 +37,7 @@ export default function AdminUsers({ restaurants, users, onChange }) {
         <div className="uply-mono" style={{ fontSize: 11, color: '#576257', marginBottom: 12 }}>
           {t('createUser').toUpperCase()}
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 8 }}>
+        <div className="uply-form-grid" style={{ marginBottom: 8 }}>
           <input placeholder={t('userName')} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} style={inputStyle} />
           <input placeholder={t('userEmail')} type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} style={inputStyle} />
           <input placeholder={t('userPassword') + ' (min. 6)'} type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} style={inputStyle} />

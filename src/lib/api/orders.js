@@ -33,6 +33,7 @@ export async function createOrder(restaurantId, items, userId, comment = '') {
     unit_price: it.unitPrice || 0,
   }));
   const { error: itemsError } = await supabase.from('order_items').insert(orderItems);
+  if (!itemsError) await notifyRestaurant(restaurantId, 'Votre commande a été validée.');
   return { error: itemsError, data: order };
 }
 
@@ -41,6 +42,7 @@ export async function updateOrderStatus(orderId, status, restaurantId) {
   if (!error && restaurantId) {
     const messages = {
       'En préparation': 'Votre commande est en préparation.',
+      'En livraison': 'Votre commande est en cours de livraison.',
       'Livrée': 'Votre commande est livrée.',
     };
     if (messages[status]) await notifyRestaurant(restaurantId, messages[status]);
@@ -82,18 +84,36 @@ export async function fetchOrderStats(restaurantId) {
 export async function fetchAdminStats() {
   const { data: orderItems } = await supabase
     .from('order_items')
-    .select('product_id, name, qty, orders!inner(restaurant_id, status, created_at)');
+    .select('product_id, name, qty, unit_price, orders!inner(restaurant_id, status, created_at), products(supplier)');
 
   const { data: orders } = await supabase.from('orders').select('id, restaurant_id, status, created_at');
+  const { data: restaurants } = await supabase.from('restaurants').select('id, name');
 
   const productCounts = {};
+  const supplierSpend = {};
   for (const it of orderItems || []) {
-    if (!it.name) continue;
-    productCounts[it.name] = (productCounts[it.name] || 0) + 1;
+    if (it.name) productCounts[it.name] = (productCounts[it.name] || 0) + 1;
+    const supplierName = it.products?.supplier || 'Non renseigné';
+    const lineTotal = (it.qty || 0) * (it.unit_price || 0);
+    supplierSpend[supplierName] = (supplierSpend[supplierName] || 0) + lineTotal;
   }
   const topProducts = Object.entries(productCounts)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 5)
+    .map(([name, count]) => ({ name, count }));
+  const spendBySupplier = Object.entries(supplierSpend)
+    .sort((a, b) => b[1] - a[1])
+    .map(([supplier, total]) => ({ supplier, total }));
+
+  const restaurantNames = {};
+  for (const r of restaurants || []) restaurantNames[r.id] = r.name;
+  const restaurantCounts = {};
+  for (const o of orders || []) {
+    const name = restaurantNames[o.restaurant_id] || '—';
+    restaurantCounts[name] = (restaurantCounts[name] || 0) + 1;
+  }
+  const ordersByRestaurant = Object.entries(restaurantCounts)
+    .sort((a, b) => b[1] - a[1])
     .map(([name, count]) => ({ name, count }));
 
   const now = new Date();
@@ -107,6 +127,8 @@ export async function fetchAdminStats() {
       totalOrders: (orders || []).length,
       ordersThisMonth: thisMonth.length,
       topProducts,
+      ordersByRestaurant,
+      spendBySupplier,
     },
     error: null,
   };

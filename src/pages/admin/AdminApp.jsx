@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Store, Package, Inbox, ClipboardList, Users, BarChart3 } from 'lucide-react';
+import { Store, Package, Inbox, ClipboardList, Users, BarChart3, Truck } from 'lucide-react';
 import * as api from '../../lib/api';
 import { GlobalStyle, TopBar } from '../../components/shared';
 import { useLanguage } from '../../i18n/LanguageContext';
 import AdminHome from './Home';
 import AdminRestaurants from './Restaurants';
 import AdminProducts from './Products';
+import AdminSuppliers from './Suppliers';
 import AdminRequests from './Requests';
 import AdminOrders from './Orders';
 import AdminUsers from './Users';
@@ -16,6 +17,7 @@ export default function AdminApp({ profile, onLogout }) {
   const [tab, setTab] = useState('home');
   const [restaurants, setRestaurants] = useState([]);
   const [products, setProducts] = useState([]);
+  const [suppliers, setSuppliers] = useState([]);
   const [orders, setOrders] = useState([]);
   const [requests, setRequests] = useState([]);
   const [users, setUsers] = useState([]);
@@ -25,15 +27,17 @@ export default function AdminApp({ profile, onLogout }) {
 
   async function loadAll() {
     setLoading(true);
-    const [r, p, o, req, u] = await Promise.all([
+    const [r, p, s, o, req, u] = await Promise.all([
       api.fetchRestaurants(),
       api.fetchProducts(),
+      api.fetchSuppliers(),
       api.fetchOrders(),
       api.fetchProductRequests(),
       api.fetchUsers(),
     ]);
     setRestaurants(r.data);
     setProducts(p.data);
+    setSuppliers(s.data);
     setOrders(o.data);
     setRequests(req.data);
     setUsers(u.data);
@@ -44,6 +48,7 @@ export default function AdminApp({ profile, onLogout }) {
     { id: 'home', label: t('tabHome'), icon: Store },
     { id: 'restaurants', label: t('tabRestaurants'), icon: Store },
     { id: 'products', label: t('tabProducts'), icon: Package },
+    { id: 'suppliers', label: t('tabSuppliers'), icon: Truck },
     { id: 'requests', label: t('tabRequests'), icon: Inbox },
     { id: 'orders', label: t('tabOrders'), icon: ClipboardList },
     { id: 'users', label: t('tabUsers'), icon: Users },
@@ -82,6 +87,7 @@ export default function AdminApp({ profile, onLogout }) {
         {tab === 'home' && <AdminHome restaurants={restaurants} products={products} orders={orders} requests={requests} />}
         {tab === 'restaurants' && <AdminRestaurants restaurants={restaurants} products={products} users={users} onChange={loadAll} />}
         {tab === 'products' && <AdminProducts restaurants={restaurants} products={products} onChange={loadAll} />}
+        {tab === 'suppliers' && <AdminSuppliers restaurants={restaurants} suppliers={suppliers} onChange={loadAll} />}
         {tab === 'requests' && <AdminRequests requests={requests} restaurants={restaurants} onChange={loadAll} />}
         {tab === 'orders' && <AdminOrders orders={orders} restaurants={restaurants} onChange={loadAll} />}
         {tab === 'users' && <AdminUsers restaurants={restaurants} users={users} onChange={loadAll} />}

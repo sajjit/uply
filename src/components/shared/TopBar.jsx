@@ -1,6 +1,7 @@
 import React from 'react';
 import { ArrowLeft, LogOut, Globe } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
+import logoImage from '../../assets/logo.jpeg';
 
 export function LanguageToggle() {
   const { lang, setLang } = useLanguage();
@@ -30,15 +31,16 @@ export default function TopBar({ title, subtitle, onBack, onLogout, showLanguage
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
         {onBack && (
-          <button onClick={onBack} style={{ background: 'none', border: 'none', color: '#F7F9F7', padding: 4 }}>
+          <button onClick={onBack} style={{ background: 'none', border: 'none', color: '#F7F9F7', padding: 4, flexShrink: 0 }}>
             <ArrowLeft size={20} />
           </button>
         )}
+        <img src={logoImage} alt="" style={{ width: 26, height: 26, objectFit: 'contain', borderRadius: 6, flexShrink: 0 }} />
         <div style={{ minWidth: 0 }}>
           <div className="uply-display" style={{ fontSize: 17, fontWeight: 700, lineHeight: 1.2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
             {title}
           </div>
-          {subtitle && <div className="uply-mono" style={{ fontSize: 11, opacity: 0.7 }}>{subtitle}</div>}
+          {subtitle && <div className="uply-mono" style={{ fontSize: 11, opacity: 0.7, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{subtitle}</div>}
         </div>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>

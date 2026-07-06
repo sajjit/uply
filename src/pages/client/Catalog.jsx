@@ -8,9 +8,19 @@ export default function Catalog({ products, cart, setQty, onBack, onCart, cartCo
   const { t } = useLanguage();
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('Toutes');
+  const [quickFilter, setQuickFilter] = useState('all');
   const categories = ['Toutes', ...Array.from(new Set(products.map((p) => p.category)))];
 
-  const byCategory = products.filter((p) => category === 'Toutes' || p.category === category);
+  let base = products;
+  if (quickFilter === 'favorites') {
+    base = base.filter((p) => favorites.includes(p.id));
+  } else if (quickFilter === 'mostOrdered') {
+    base = base.filter((p) => stats[p.id]?.count > 0).sort((a, b) => (stats[b.id]?.count || 0) - (stats[a.id]?.count || 0));
+  } else if (quickFilter === 'recent') {
+    base = base.filter((p) => stats[p.id]?.lastDate).sort((a, b) => new Date(stats[b.id]?.lastDate) - new Date(stats[a.id]?.lastDate));
+  }
+
+  const byCategory = base.filter((p) => category === 'Toutes' || p.category === category);
 
   let filtered;
   if (search.trim()) {
@@ -20,11 +30,13 @@ export default function Catalog({ products, cart, setQty, onBack, onCart, cartCo
     filtered = byCategory;
   }
 
-  filtered = filtered.slice().sort((a, b) => {
-    const aFav = favorites.includes(a.id) ? 0 : 1;
-    const bFav = favorites.includes(b.id) ? 0 : 1;
-    return aFav - bFav;
-  });
+  if (quickFilter === 'all') {
+    filtered = filtered.slice().sort((a, b) => {
+      const aFav = favorites.includes(a.id) ? 0 : 1;
+      const bFav = favorites.includes(b.id) ? 0 : 1;
+      return aFav - bFav;
+    });
+  }
 
   return (
     <div>
@@ -38,6 +50,26 @@ export default function Catalog({ products, cart, setQty, onBack, onCart, cartCo
             onChange={(e) => setSearch(e.target.value)}
             style={{ width: '100%', padding: '11px 12px 11px 36px', border: '1.5px solid #CBD3CB', borderRadius: 6, fontSize: 14 }}
           />
+        </div>
+        <div style={{ display: 'flex', gap: 6, overflowX: 'auto', marginBottom: 10, paddingBottom: 4 }}>
+          {[
+            { id: 'all', label: t('filterAll') },
+            { id: 'favorites', label: '⭐ ' + t('filterFavorites') },
+            { id: 'mostOrdered', label: '🔥 ' + t('filterMostOrdered') },
+            { id: 'recent', label: '🕐 ' + t('filterRecent') },
+          ].map((f) => (
+            <button
+              key={f.id}
+              onClick={() => setQuickFilter(f.id)}
+              style={{
+                whiteSpace: 'nowrap', padding: '6px 12px', borderRadius: 20, fontSize: 12, fontWeight: 600,
+                border: '1.5px solid ' + (quickFilter === f.id ? '#0D0F0D' : '#CBD3CB'),
+                background: quickFilter === f.id ? '#0D0F0D' : '#fff', color: quickFilter === f.id ? '#F7F9F7' : '#0D0F0D',
+              }}
+            >
+              {f.label}
+            </button>
+          ))}
         </div>
         <div style={{ display: 'flex', gap: 6, overflowX: 'auto', marginBottom: 16, paddingBottom: 4 }}>
           {categories.map((c) => (
@@ -76,7 +108,7 @@ export default function Catalog({ products, cart, setQty, onBack, onCart, cartCo
                           </span>
                         )}
                       </div>
-                      <div className="uply-mono" style={{ fontSize: 11, color: '#8A938A' }}>{p.category} · {p.unit}</div>
+                      <div className="uply-mono" style={{ fontSize: 11, color: '#8A938A' }}>{p.category} · {p.unit} · {(p.price || 0).toFixed(2)} €</div>
                       {stat && (
                         <div className="uply-mono" style={{ fontSize: 10, color: '#C9A227', marginTop: 2 }}>
                           ⭐ {t('orderedTimes', { count: stat.count })}
