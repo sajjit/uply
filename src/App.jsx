@@ -4,6 +4,7 @@ import * as api from './lib/api';
 import { LanguageProvider } from './i18n/LanguageContext';
 import { GlobalStyle } from './components/shared';
 import Login from './pages/Login';
+import SetNewPassword from './pages/SetNewPassword';
 import ClientApp from './pages/client/ClientApp';
 import AdminApp from './pages/admin/AdminApp';
 
@@ -19,11 +20,13 @@ import AdminApp from './pages/admin/AdminApp';
 export default function App() {
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState(null);
+  const [recovery, setRecovery] = useState(false);
 
   useEffect(() => {
     init();
     const { data: listener } = supabase.auth.onAuthStateChange((event) => {
-      if (event === 'SIGNED_OUT') setProfile(null);
+      if (event === 'SIGNED_OUT') { setProfile(null); setRecovery(false); }
+      if (event === 'PASSWORD_RECOVERY') setRecovery(true);
     });
     return () => listener.subscription.unsubscribe();
   }, []);
@@ -49,19 +52,26 @@ export default function App() {
     setProfile(null);
   }
 
+  function handlePasswordResetDone() {
+    setRecovery(false);
+    setProfile((prev) => (prev ? { ...prev, must_reset_password: false } : prev));
+  }
+
   return (
     <LanguageProvider profileId={profile?.id || null}>
       <AppContent
         loading={loading}
         profile={profile}
+        recovery={recovery}
         onLogin={handleLogin}
         onLogout={handleLogout}
+        onPasswordResetDone={handlePasswordResetDone}
       />
     </LanguageProvider>
   );
 }
 
-function AppContent({ loading, profile, onLogin, onLogout }) {
+function AppContent({ loading, profile, recovery, onLogin, onLogout, onPasswordResetDone }) {
   if (loading) {
     return (
       <div className="uply-root" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
@@ -71,8 +81,19 @@ function AppContent({ loading, profile, onLogin, onLogout }) {
     );
   }
 
+  // Followed a "forgot password" email link — force the new-password screen
+  // regardless of role, before anything else can render.
+  if (recovery) {
+    return <SetNewPassword profileId={profile?.id} onDone={onPasswordResetDone} />;
+  }
+
   if (!profile) {
     return <Login onLogin={onLogin} />;
+  }
+
+  // Admin-created account that hasn't set its own password yet.
+  if (profile.must_reset_password) {
+    return <SetNewPassword profileId={profile.id} forced onDone={onPasswordResetDone} />;
   }
 
   if (profile.role === 'admin') {

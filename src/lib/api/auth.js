@@ -22,6 +22,28 @@ export async function signOut() {
   await supabase.auth.signOut();
 }
 
+/** Sends a password-reset email via Supabase's built-in flow. Always
+ * "succeeds" from the caller's perspective (Supabase doesn't reveal
+ * whether the address has an account, to avoid leaking that info). */
+export async function requestPasswordReset(email) {
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.origin,
+  });
+  return { error: error ? error.message : null };
+}
+
+/** Sets a new password for the currently authenticated session — used
+ * both for the recovery-link flow and the forced first-login reset. */
+export async function updatePassword(newPassword) {
+  const { error } = await supabase.auth.updateUser({ password: newPassword });
+  return { error: error ? error.message : null };
+}
+
+export async function clearMustResetPassword(profileId) {
+  const { error } = await supabase.from('profiles').update({ must_reset_password: false }).eq('id', profileId);
+  return { error };
+}
+
 export async function getSession() {
   const { data } = await supabase.auth.getSession();
   return data.session;
@@ -54,14 +76,23 @@ export async function fetchUsers() {
   return { data: data || [], error };
 }
 
+/** Creates a client account via the admin-create-user Edge Function, which
+ * uses the Supabase Admin API (service-role key, server-side only) — unlike
+ * the old raw-SQL RPC, accounts created this way can actually log in. */
 export async function adminCreateUser(email, password, name, restaurantId) {
-  const { data, error } = await supabase.rpc('admin_create_user', {
-    p_email: email,
-    p_password: password,
-    p_name: name,
-    p_restaurant_id: restaurantId,
+  const { data, error } = await supabase.functions.invoke('admin-create-user', {
+    body: { email, password, name, restaurantId },
   });
-  if (error) return { data: null, error: error.message };
-  if (data && !data.success) return { data: null, error: data.error };
+  if (error) {
+    let message = error.message;
+    try {
+      const body = await error.context.json();
+      if (body?.error) message = body.error;
+    } catch {
+      // fall back to the generic error.message above
+    }
+    return { data: null, error: message };
+  }
+  if (data && data.error) return { data: null, error: data.error };
   return { data, error: null };
 }
