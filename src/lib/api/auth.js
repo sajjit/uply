@@ -76,12 +76,13 @@ export async function fetchUsers() {
   return { data: data || [], error };
 }
 
-/** Creates a client account via the admin-create-user Edge Function, which
- * uses the Supabase Admin API (service-role key, server-side only) — unlike
- * the old raw-SQL RPC, accounts created this way can actually log in. */
-export async function adminCreateUser(email, password, name, restaurantId) {
+/** Invites a client account by email via the admin-create-user Edge Function
+ * (Supabase Admin API, service-role key, server-side only). No password is
+ * set by the admin — Supabase sends a real invite email, and the recipient
+ * sets their own password after clicking the link. */
+export async function adminCreateUser(email, name, restaurantId) {
   const { data, error } = await supabase.functions.invoke('admin-create-user', {
-    body: { email, password, name, restaurantId },
+    body: { email, name, restaurantId, redirectTo: window.location.origin },
   });
   if (error) {
     let message = error.message;

@@ -1,11 +1,10 @@
 // Supabase Edge Function: admin-create-user
 //
-// Creates a client account through Supabase's official Admin API
-// (auth.admin.createUser) instead of hand-inserting rows into
-// auth.users via SQL — the raw-SQL approach in the old
-// admin_create_user() Postgres function produced accounts that could
-// never actually log in, because Supabase Auth (GoTrue) relies on
-// internal invariants a plain INSERT can't reproduce.
+// Invites a client account by email through Supabase's official Admin API
+// (auth.admin.inviteUserByEmail) — the admin never sees or sets a password.
+// Supabase sends its built-in invite email; clicking the link signs the
+// person in and our app's forced-password-reset screen (triggered by the
+// must_reset_password flag) lets them set their own password.
 //
 // Deploy: paste this file's contents into Supabase Dashboard →
 // Edge Functions → "admin-create-user" → Code tab → deploy.
@@ -67,35 +66,34 @@ Deno.serve(async (req) => {
       return jsonResponse({ error: 'Permission refusée : réservé aux administrateurs.' }, 403);
     }
 
-    const { email, password, name, restaurantId } = await req.json();
+    const { email, name, restaurantId, redirectTo } = await req.json();
 
-    if (!email || !password || password.length < 6) {
-      return jsonResponse({ error: 'Adresse e-mail et mot de passe (min. 6 caractères) requis.' }, 400);
+    if (!email) {
+      return jsonResponse({ error: 'Adresse e-mail requise.' }, 400);
     }
 
-    const { data: created, error: createError } = await adminClient.auth.admin.createUser({
-      email: String(email).toLowerCase(),
-      password,
-      email_confirm: true,
-      user_metadata: { name },
-    });
+    const { data: invited, error: inviteError } = await adminClient.auth.admin.inviteUserByEmail(
+      String(email).toLowerCase(),
+      { data: { name }, redirectTo }
+    );
 
-    if (createError) {
-      return jsonResponse({ error: createError.message }, 400);
+    if (inviteError) {
+      return jsonResponse({ error: inviteError.message }, 400);
     }
 
     // The on_auth_user_created trigger already inserted a default profile row —
-    // fill in the restaurant/role/forced-reset flag on top of it.
+    // fill in the restaurant/role/forced-reset flag on top of it. must_reset_password
+    // stays true until they click the invite link and set their own password.
     const { error: updateError } = await adminClient
       .from('profiles')
       .update({ name, restaurant_id: restaurantId, role: 'client', must_reset_password: true })
-      .eq('id', created.user.id);
+      .eq('id', invited.user.id);
 
     if (updateError) {
       return jsonResponse({ error: updateError.message }, 400);
     }
 
-    return jsonResponse({ success: true, id: created.user.id, email: created.user.email });
+    return jsonResponse({ success: true, id: invited.user.id, email: invited.user.email });
   } catch (err) {
     return jsonResponse({ error: err.message || 'Erreur inconnue.' }, 500);
   }

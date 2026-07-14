@@ -204,15 +204,15 @@ export const translations = {
     currentPrice: "Prix actuel",
     viewDetails: "Détails",
 
-    // User creation (in-app)
-    createUser: "Créer un utilisateur",
+    // User invitation (in-app)
+    inviteUser: "Inviter un utilisateur",
+    inviteUserDesc: "Le client recevra un e-mail avec un lien pour définir son propre mot de passe.",
     userName: "Nom complet",
     userEmail: "Adresse e-mail",
-    userPassword: "Mot de passe temporaire",
     userRestaurant: "Restaurant",
-    creating: "Création…",
-    userCreated: "Utilisateur créé avec succès.",
-    userCreateError: "Erreur lors de la création :",
+    userInvited: "Invitation envoyée avec succès.",
+    invitePending: "invitation en attente",
+    userCreateError: "Erreur lors de l'invitation :",
   },
 
   en: {
@@ -402,14 +402,14 @@ export const translations = {
     currentPrice: "Current price",
     viewDetails: "Details",
 
-    createUser: "Create a user",
+    inviteUser: "Invite a user",
+    inviteUserDesc: "The client will get an email with a link to set their own password.",
     userName: "Full name",
     userEmail: "Email address",
-    userPassword: "Temporary password",
     userRestaurant: "Restaurant",
-    creating: "Creating…",
-    userCreated: "User created successfully.",
-    userCreateError: "Error creating user:",
+    userInvited: "Invitation sent successfully.",
+    invitePending: "invite pending",
+    userCreateError: "Error sending invitation:",
   },
 };
 

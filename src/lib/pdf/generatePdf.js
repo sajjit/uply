@@ -12,6 +12,15 @@ const PAGE_WIDTH = 595; // A4 in points
 const PAGE_HEIGHT = 842;
 const MARGIN = 50;
 
+const UPLY_INFO = {
+  manager: 'CÉVA Steeve',
+  address: 'Résidence Calebassier 4, Palais Royale, 97139 Les Abymes',
+  phone: '0690935996',
+  email: 'Steeveceva@outlook.fr',
+  siret: '932934768',
+  vat: 'FR32932938764',
+};
+
 async function setupDoc() {
   const pdfDoc = await PDFDocument.create();
   const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
@@ -23,9 +32,19 @@ async function setupDoc() {
 function drawHeader(page, font, fontBold, { docTitle, docNumber, dateLabel, restaurant }) {
   let y = PAGE_HEIGHT - MARGIN;
 
-  // Brand mark
+  // Brand mark + Uply's own company info (required on French invoices/POs)
   page.drawText('Uply', { x: MARGIN, y, size: 22, font: fontBold, color: rgb(0.10, 0.11, 0.10) });
-  page.drawText('Réapprovisionnement simplifié', { x: MARGIN, y: y - 16, size: 8, font, color: rgb(0.4, 0.4, 0.4) });
+  const brandLines = [
+    `${UPLY_INFO.manager} — Réapprovisionnement simplifié`,
+    UPLY_INFO.address,
+    `Tél : ${UPLY_INFO.phone} · ${UPLY_INFO.email}`,
+    `SIRET : ${UPLY_INFO.siret} · TVA : ${UPLY_INFO.vat}`,
+  ];
+  let brandY = y - 16;
+  for (const line of brandLines) {
+    page.drawText(line, { x: MARGIN, y: brandY, size: 7, font, color: rgb(0.4, 0.4, 0.4) });
+    brandY -= 10;
+  }
 
   // Document title block (right aligned)
   const titleWidth = fontBold.widthOfTextAtSize(docTitle, 16);
@@ -36,7 +55,7 @@ function drawHeader(page, font, fontBold, { docTitle, docNumber, dateLabel, rest
   const dateWidth = font.widthOfTextAtSize(dateLabel, 10);
   page.drawText(dateLabel, { x: PAGE_WIDTH - MARGIN - dateWidth, y: y - 32, size: 10, font, color: rgb(0.3, 0.3, 0.3) });
 
-  y -= 60;
+  y -= 78;
   page.drawLine({ start: { x: MARGIN, y }, end: { x: PAGE_WIDTH - MARGIN, y }, thickness: 1, color: rgb(0.85, 0.83, 0.78) });
 
   y -= 24;
