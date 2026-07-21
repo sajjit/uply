@@ -21,7 +21,7 @@ export function LanguageToggle() {
   );
 }
 
-export default function TopBar({ title, subtitle, onBack, onLogout, showLanguageToggle = true }) {
+export default function TopBar({ title, subtitle, onBack, onLogout, showLanguageToggle = true, extra }) {
   const { t } = useLanguage();
   return (
     <div style={{
@@ -44,6 +44,7 @@ export default function TopBar({ title, subtitle, onBack, onLogout, showLanguage
         </div>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+        {extra}
         {showLanguageToggle && <LanguageToggle />}
         {onLogout && (
           <button onClick={onLogout} style={{ background: 'none', border: '1px solid #243024', borderRadius: 6, color: '#F7F9F7', padding: '6px 10px', display: 'flex', alignItems: 'center', gap: 6, fontSize: 12 }}>

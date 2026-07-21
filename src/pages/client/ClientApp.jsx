@@ -69,7 +69,7 @@ export default function ClientApp({ profile, onLogout }) {
       return { productId, name: p?.name, qty: c.qty, unit: p?.unit, comment: c.comment, unitPrice: p?.price || 0 };
     });
     if (items.length === 0) return;
-    await api.createOrder(profile.restaurant_id, items, profile.id, cartComment);
+    await api.createOrder(profile.restaurant_id, items, profile.id, cartComment, restaurant?.name);
     setCart({});
     setCartComment('');
     await loadAll();

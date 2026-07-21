@@ -32,10 +32,9 @@ export async function notifyRestaurant(restaurantId, message) {
   await supabase.from('notifications').insert(rows);
 }
 
-// Notify every admin profile (used e.g. when a client submits a new product request)
+// Notify every admin profile (used e.g. when a client submits a new product
+// request, or places an order). Goes through a security-definer RPC since a
+// client caller can't SELECT other people's profiles to find admins directly.
 export async function notifyAdmins(message) {
-  const { data: admins } = await supabase.from('profiles').select('id').eq('role', 'admin');
-  if (!admins || admins.length === 0) return;
-  const rows = admins.map((a) => ({ profile_id: a.id, message }));
-  await supabase.from('notifications').insert(rows);
+  await supabase.rpc('notify_admins', { p_message: message });
 }

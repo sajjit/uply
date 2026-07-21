@@ -1,5 +1,5 @@
 import { supabase } from '../supabaseClient';
-import { notifyRestaurant } from './notifications';
+import { notifyRestaurant, notifyAdmins } from './notifications';
 
 /* ============================================================
    Orders & order items
@@ -15,7 +15,7 @@ export async function fetchOrders(restaurantId = null) {
   return { data: data || [], error };
 }
 
-export async function createOrder(restaurantId, items, userId, comment = '') {
+export async function createOrder(restaurantId, items, userId, comment = '', restaurantName = '') {
   const { data: order, error: orderError } = await supabase
     .from('orders')
     .insert({ restaurant_id: restaurantId, status: 'En attente', created_by: userId, comment })
@@ -33,8 +33,23 @@ export async function createOrder(restaurantId, items, userId, comment = '') {
     unit_price: it.unitPrice || 0,
   }));
   const { error: itemsError } = await supabase.from('order_items').insert(orderItems);
-  if (!itemsError) await notifyRestaurant(restaurantId, 'Votre commande a été validée.');
+  if (!itemsError) {
+    await notifyRestaurant(restaurantId, 'Votre commande a été validée.');
+    await notifyAdmins(`Nouvelle commande reçue de ${restaurantName || 'un restaurant'}.`);
+    await notifyOrderEmail(order.id, restaurantName, items);
+  }
   return { error: itemsError, data: order };
+}
+
+// Best-effort email alert (via the notify-order Edge Function / Resend) —
+// never blocks order creation if it fails.
+async function notifyOrderEmail(orderId, restaurantName, items) {
+  try {
+    const itemsSummary = items.map((it) => `${it.name} (${it.qty} ${it.unit || ''})`).join('<br/>');
+    await supabase.functions.invoke('notify-order', { body: { orderId, restaurantName, itemsSummary } });
+  } catch {
+    // ignore — email delivery is not critical to placing the order
+  }
 }
 
 export async function updateOrderStatus(orderId, status, restaurantId) {
