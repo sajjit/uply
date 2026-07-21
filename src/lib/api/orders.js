@@ -1,5 +1,6 @@
 import { supabase } from '../supabaseClient';
 import { notifyRestaurant, notifyAdmins } from './notifications';
+import { generatePurchaseOrderPdf } from '../pdf/generatePdf';
 
 /* ============================================================
    Orders & order items
@@ -15,7 +16,12 @@ export async function fetchOrders(restaurantId = null) {
   return { data: data || [], error };
 }
 
-export async function createOrder(restaurantId, items, userId, comment = '', restaurantName = '') {
+/**
+ * @param {boolean} skipAdminNotify - true when the admin is placing this order
+ * themselves (e.g. taking an order in person at a restaurant) — no point
+ * notifying/emailing the admin about an order they just entered.
+ */
+export async function createOrder(restaurantId, items, userId, comment = '', restaurantName = '', skipAdminNotify = false) {
   const { data: order, error: orderError } = await supabase
     .from('orders')
     .insert({ restaurant_id: restaurantId, status: 'En attente', created_by: userId, comment })
@@ -35,21 +41,36 @@ export async function createOrder(restaurantId, items, userId, comment = '', res
   const { error: itemsError } = await supabase.from('order_items').insert(orderItems);
   if (!itemsError) {
     await notifyRestaurant(restaurantId, 'Votre commande a été validée.');
-    await notifyAdmins(`Nouvelle commande reçue de ${restaurantName || 'un restaurant'}.`);
-    await notifyOrderEmail(order.id, restaurantName, items);
+    if (!skipAdminNotify) {
+      await notifyAdmins(`Nouvelle commande reçue de ${restaurantName || 'un restaurant'}.`);
+      await notifyOrderEmail(order, restaurantName, items);
+    }
   }
   return { error: itemsError, data: order };
 }
 
 // Best-effort email alert (via the notify-order Edge Function / Resend) —
-// never blocks order creation if it fails.
-async function notifyOrderEmail(orderId, restaurantName, items) {
+// never blocks order creation if it fails. Attaches the bon de commande PDF
+// so the admin has it immediately without opening the app.
+async function notifyOrderEmail(order, restaurantName, items) {
   try {
     const itemsSummary = items.map((it) => `${it.name} (${it.qty} ${it.unit || ''})`).join('<br/>');
-    await supabase.functions.invoke('notify-order', { body: { orderId, restaurantName, itemsSummary } });
+    const pdfBlob = await generatePurchaseOrderPdf({ ...order, order_items: items }, { name: restaurantName });
+    const pdfBase64 = await blobToBase64(pdfBlob);
+    await supabase.functions.invoke('notify-order', {
+      body: { orderId: order.id, restaurantName, itemsSummary, pdfBase64 },
+    });
   } catch {
     // ignore — email delivery is not critical to placing the order
   }
+}
+
+async function blobToBase64(blob) {
+  const buffer = await blob.arrayBuffer();
+  const bytes = new Uint8Array(buffer);
+  let binary = '';
+  for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]);
+  return btoa(binary);
 }
 
 export async function updateOrderStatus(orderId, status, restaurantId) {

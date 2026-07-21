@@ -50,7 +50,7 @@ Deno.serve(async (req) => {
       return jsonResponse({ error: 'Session invalide.' }, 401);
     }
 
-    const { restaurantName, itemsSummary, orderId } = await req.json();
+    const { restaurantName, itemsSummary, orderId, pdfBase64 } = await req.json();
 
     const html = `
       <div style="font-family: sans-serif; color: #0D0F0D;">
@@ -63,18 +63,24 @@ Deno.serve(async (req) => {
       </div>
     `;
 
+    const emailPayload = {
+      from: 'Uply <onboarding@resend.dev>',
+      to: [NOTIFY_EMAIL],
+      subject: `Nouvelle commande — ${restaurantName || 'Restaurant'}`,
+      html,
+    };
+    if (pdfBase64) {
+      const orderRef = orderId ? String(orderId).slice(0, 8).toUpperCase() : 'commande';
+      emailPayload.attachments = [{ filename: `bon-de-commande-${orderRef}.pdf`, content: pdfBase64 }];
+    }
+
     const resendRes = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${resendApiKey}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        from: 'Uply <onboarding@resend.dev>',
-        to: [NOTIFY_EMAIL],
-        subject: `Nouvelle commande — ${restaurantName || 'Restaurant'}`,
-        html,
-      }),
+      body: JSON.stringify(emailPayload),
     });
 
     if (!resendRes.ok) {
