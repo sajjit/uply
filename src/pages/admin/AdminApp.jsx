@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Store, Package, Inbox, ClipboardList, Users, BarChart3, Truck, Bell, ShoppingCart } from 'lucide-react';
+import { Store, Package, Inbox, ClipboardList, Users, BarChart3, Truck, Bell, ShoppingCart, Archive } from 'lucide-react';
 import * as api from '../../lib/api';
 import { GlobalStyle, TopBar } from '../../components/shared';
 import { useLanguage } from '../../i18n/LanguageContext';
@@ -63,6 +63,7 @@ export default function AdminApp({ profile, onLogout }) {
     { id: 'suppliers', label: t('tabSuppliers'), icon: Truck },
     { id: 'requests', label: t('tabRequests'), icon: Inbox },
     { id: 'orders', label: t('tabOrders'), icon: ClipboardList },
+    { id: 'archive', label: t('tabArchive'), icon: Archive },
     { id: 'placeOrder', label: t('tabPlaceOrder'), icon: ShoppingCart },
     { id: 'users', label: t('tabUsers'), icon: Users },
     { id: 'stats', label: 'Stats', icon: BarChart3 },
@@ -133,6 +134,7 @@ export default function AdminApp({ profile, onLogout }) {
         {tab === 'suppliers' && <AdminSuppliers restaurants={restaurants} suppliers={suppliers} onChange={() => loadAll(true)} />}
         {tab === 'requests' && <AdminRequests requests={requests} restaurants={restaurants} onChange={() => loadAll(true)} />}
         {tab === 'orders' && <AdminOrders orders={orders} restaurants={restaurants} onChange={() => loadAll(true)} />}
+        {tab === 'archive' && <AdminOrders orders={orders} restaurants={restaurants} onChange={() => loadAll(true)} archived />}
         {tab === 'placeOrder' && <AdminPlaceOrder restaurants={restaurants} products={products} profile={profile} onChange={() => loadAll(true)} />}
         {tab === 'users' && <AdminUsers restaurants={restaurants} users={users} onChange={() => loadAll(true)} />}
         {tab === 'stats' && <AdminStats />}

@@ -167,6 +167,8 @@ export const translations = {
     decline: "Refuser",
 
     allOrders: "Toutes les commandes",
+    archivedOrders: "Archives",
+    tabArchive: "Archives",
     noOrders: "Aucune commande",
     filters: "FILTRES",
     allRestaurants: "Tous les restaurants",
@@ -370,6 +372,8 @@ export const translations = {
     decline: "Decline",
 
     allOrders: "All orders",
+    archivedOrders: "Archive",
+    tabArchive: "Archive",
     noOrders: "No orders",
     filters: "FILTERS",
     allRestaurants: "All restaurants",

@@ -5,7 +5,7 @@ import { generateInvoicePdf, generatePurchaseOrderPdf, generateDeliveryNotePdf, 
 import { SectionHeader, EmptyState, StatusTab, STATUS_FR_VALUES, fmtDate, inputStyle } from '../../components/shared';
 import { useLanguage } from '../../i18n/LanguageContext';
 
-export default function AdminOrders({ orders, restaurants, onChange }) {
+export default function AdminOrders({ orders, restaurants, onChange, archived = false }) {
   const { t } = useLanguage();
   const [editingDelivery, setEditingDelivery] = useState(null);
   const [deliveryForm, setDeliveryForm] = useState({ date: '', window: '' });
@@ -15,8 +15,16 @@ export default function AdminOrders({ orders, restaurants, onChange }) {
   const [filterFrom, setFilterFrom] = useState('');
   const [filterTo, setFilterTo] = useState('');
 
+  // "Commandes" = still-active orders; "Archives" = delivered ones. Once an
+  // order is marked Livrée it disappears from Commandes and only shows here.
+  const scopedOrders = useMemo(
+    () => orders.filter((o) => (archived ? o.status === 'Livrée' : o.status !== 'Livrée')),
+    [orders, archived]
+  );
+  const statusOptions = archived ? [] : STATUS_FR_VALUES.filter((s) => s !== 'Livrée');
+
   const filteredOrders = useMemo(() => {
-    return orders.filter((o) => {
+    return scopedOrders.filter((o) => {
       if (filterRestaurant !== 'all' && o.restaurant_id !== filterRestaurant) return false;
       if (filterStatus !== 'all' && o.status !== filterStatus) return false;
       const created = new Date(o.created_at);
@@ -24,7 +32,7 @@ export default function AdminOrders({ orders, restaurants, onChange }) {
       if (filterTo && created > new Date(filterTo + 'T23:59:59')) return false;
       return true;
     });
-  }, [orders, filterRestaurant, filterStatus, filterFrom, filterTo]);
+  }, [scopedOrders, filterRestaurant, filterStatus, filterFrom, filterTo]);
 
   async function setStatus(id, status, restaurantId) {
     await api.updateOrderStatus(id, status, restaurantId);
@@ -66,7 +74,7 @@ export default function AdminOrders({ orders, restaurants, onChange }) {
 
   return (
     <div>
-      <SectionHeader title={t('allOrders')} />
+      <SectionHeader title={archived ? t('archivedOrders') : t('allOrders')} />
 
       <div style={{ background: '#fff', border: '1px solid #E1E6E1', borderRadius: 8, padding: 12, marginBottom: 16 }}>
         <div className="uply-mono" style={{ fontSize: 11, color: '#576257', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -77,10 +85,12 @@ export default function AdminOrders({ orders, restaurants, onChange }) {
             <option value="all">{t('allRestaurants')}</option>
             {restaurants.map((r) => <option key={r.id} value={r.id}>{r.name}</option>)}
           </select>
-          <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} style={inputStyle}>
-            <option value="all">{t('allStatuses')}</option>
-            {STATUS_FR_VALUES.map((st) => <option key={st} value={st}>{st}</option>)}
-          </select>
+          {!archived && (
+            <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} style={inputStyle}>
+              <option value="all">{t('allStatuses')}</option>
+              {statusOptions.map((st) => <option key={st} value={st}>{st}</option>)}
+            </select>
+          )}
           <input type="date" value={filterFrom} onChange={(e) => setFilterFrom(e.target.value)} style={inputStyle} />
           <input type="date" value={filterTo} onChange={(e) => setFilterTo(e.target.value)} style={inputStyle} />
         </div>
