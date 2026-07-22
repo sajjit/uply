@@ -9,7 +9,7 @@ export default function AdminRestaurants({ restaurants, products, users, onChang
   const [name, setName] = useState('');
   const [busy, setBusy] = useState(false);
   const [editing, setEditing] = useState(null);
-  const [editForm, setEditForm] = useState({ address: '', phone: '' });
+  const [editForm, setEditForm] = useState({ ownerName: '', address: '', phone: '' });
 
   async function add() {
     if (!name.trim()) return;
@@ -27,11 +27,15 @@ export default function AdminRestaurants({ restaurants, products, users, onChang
 
   function startEdit(r) {
     setEditing(r.id);
-    setEditForm({ address: r.address || '', phone: r.phone || '' });
+    setEditForm({ ownerName: r.owner_name || '', address: r.address || '', phone: r.phone || '' });
   }
 
   async function saveEdit() {
-    await api.updateRestaurant(editing, { address: editForm.address.trim() || null, phone: editForm.phone.trim() || null });
+    await api.updateRestaurant(editing, {
+      owner_name: editForm.ownerName.trim() || null,
+      address: editForm.address.trim() || null,
+      phone: editForm.phone.trim() || null,
+    });
     setEditing(null);
     onChange();
   }
@@ -59,6 +63,7 @@ export default function AdminRestaurants({ restaurants, products, users, onChang
               <div key={r.id} style={{ background: '#EFFBE3', border: '1.5px solid #C9A227', borderRadius: 8, padding: 12 }}>
                 <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 8 }}>{r.name}</div>
                 <div className="uply-form-grid" style={{ marginBottom: 8 }}>
+                  <input placeholder={t('restaurantOwnerName')} value={editForm.ownerName} onChange={(e) => setEditForm({ ...editForm, ownerName: e.target.value })} style={inputStyle} />
                   <input placeholder={t('restaurantAddress')} value={editForm.address} onChange={(e) => setEditForm({ ...editForm, address: e.target.value })} style={inputStyle} />
                   <input placeholder={t('restaurantPhone')} value={editForm.phone} onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })} style={inputStyle} />
                 </div>
@@ -74,6 +79,9 @@ export default function AdminRestaurants({ restaurants, products, users, onChang
               <div style={{ flex: '1 1 160px', minWidth: 0 }}>
                 <div style={{ fontWeight: 600, fontSize: 14 }}>{r.name}</div>
                 <div className="uply-mono" style={{ fontSize: 11, color: '#8A938A' }}>{productsCount} produits · {usersCount} utilisateurs</div>
+                {r.owner_name && (
+                  <div className="uply-mono" style={{ fontSize: 10, color: '#576257', marginTop: 2 }}>{t('ownerLabel')} {r.owner_name}</div>
+                )}
                 {(r.address || r.phone) && (
                   <div className="uply-mono" style={{ fontSize: 10, color: '#8A938A', marginTop: 2 }}>
                     {r.address}{r.address && r.phone ? ' · ' : ''}{r.phone}

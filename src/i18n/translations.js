@@ -133,6 +133,8 @@ export const translations = {
 
     manageRestaurants: "Gestion des restaurants",
     restaurantNamePlaceholder: "Nom du restaurant",
+    restaurantOwnerName: "Nom du propriétaire",
+    ownerLabel: "Propriétaire :",
     restaurantAddress: "Adresse",
     restaurantPhone: "Téléphone",
     create: "Créer",
@@ -338,6 +340,8 @@ export const translations = {
 
     manageRestaurants: "Manage restaurants",
     restaurantNamePlaceholder: "Restaurant name",
+    restaurantOwnerName: "Owner name",
+    ownerLabel: "Owner:",
     restaurantAddress: "Address",
     restaurantPhone: "Phone",
     create: "Create",
