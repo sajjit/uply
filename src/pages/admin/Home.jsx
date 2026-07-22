@@ -13,6 +13,7 @@ function StatCard({ value, label, accent }) {
 export default function AdminHome({ restaurants, products, orders, requests }) {
   const { t } = useLanguage();
   const pendingOrders = orders.filter((o) => o.status !== 'Livrée').length;
+  const ordersToPrepare = orders.filter((o) => o.status === 'En attente').length;
   const pendingRequests = requests.filter((r) => r.status === 'En attente').length;
 
   return (
@@ -22,6 +23,7 @@ export default function AdminHome({ restaurants, products, orders, requests }) {
         <StatCard value={restaurants.length} label={t('statRestaurants')} />
         <StatCard value={products.filter((p) => p.active).length} label={t('statActiveProducts')} />
         <StatCard value={pendingOrders} label={t('statOrdersInProgress')} accent="#1FB9D6" />
+        <StatCard value={ordersToPrepare} label={t('statOrdersToPrepare')} accent="#C0392B" />
         <StatCard value={pendingRequests} label={t('statRequestsToReview')} accent="#C9A227" />
       </div>
       <div style={{ fontSize: 13, color: '#576257' }}>{t('useTabsHint')}</div>

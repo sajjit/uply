@@ -128,6 +128,7 @@ export const translations = {
     statRestaurants: "RESTAURANTS",
     statActiveProducts: "PRODUITS ACTIFS",
     statOrdersInProgress: "COMMANDES EN COURS",
+    statOrdersToPrepare: "COMMANDES À PRÉPARER",
     statRequestsToReview: "DEMANDES À VALIDER",
     useTabsHint: "Utilisez les onglets ci-dessus pour gérer les restaurants, produits, commandes et utilisateurs.",
 
@@ -335,6 +336,7 @@ export const translations = {
     statRestaurants: "RESTAURANTS",
     statActiveProducts: "ACTIVE PRODUCTS",
     statOrdersInProgress: "ORDERS IN PROGRESS",
+    statOrdersToPrepare: "ORDERS TO PREPARE",
     statRequestsToReview: "REQUESTS TO REVIEW",
     useTabsHint: "Use the tabs above to manage restaurants, products, orders and users.",
 
