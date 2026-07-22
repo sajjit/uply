@@ -135,6 +135,7 @@ export const translations = {
 
     manageRestaurants: "Gestion des restaurants",
     restaurantNamePlaceholder: "Nom du restaurant",
+    restaurantCreateError: "Erreur lors de la création :",
     restaurantOwnerName: "Nom du propriétaire",
     ownerLabel: "Propriétaire :",
     restaurantAddress: "Adresse",
@@ -344,6 +345,7 @@ export const translations = {
 
     manageRestaurants: "Manage restaurants",
     restaurantNamePlaceholder: "Restaurant name",
+    restaurantCreateError: "Error creating restaurant:",
     restaurantOwnerName: "Owner name",
     ownerLabel: "Owner:",
     restaurantAddress: "Address",

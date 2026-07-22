@@ -10,13 +10,19 @@ export default function AdminRestaurants({ restaurants, products, users, onChang
   const [busy, setBusy] = useState(false);
   const [editing, setEditing] = useState(null);
   const [editForm, setEditForm] = useState({ ownerName: '', address: '', phone: '' });
+  const [error, setError] = useState(null);
 
   async function add() {
     if (!name.trim()) return;
     setBusy(true);
-    await api.createRestaurant(name.trim());
-    setName('');
+    setError(null);
+    const { error: err } = await api.createRestaurant(name.trim());
     setBusy(false);
+    if (err) {
+      setError(err.message);
+      return;
+    }
+    setName('');
     onChange();
   }
 
@@ -54,6 +60,11 @@ export default function AdminRestaurants({ restaurants, products, users, onChang
           + {t('create')}
         </button>
       </div>
+      {error && (
+        <div style={{ fontSize: 12, padding: '8px 12px', borderRadius: 6, marginBottom: 16, background: '#FDECEA', color: '#C0392B', border: '1px solid #C0392B' }}>
+          {t('restaurantCreateError')} {error}
+        </div>
+      )}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {restaurants.map((r) => {
           const productsCount = products.filter((p) => p.restaurant_id === r.id).length;
