@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Guide d'utilisation — Uply</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background: #F7F9F7;
+      color: #0D0F0D;
+      line-height: 1.6;
+    }
+    .wrap {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 48px 24px 96px;
+    }
+    header {
+      margin-bottom: 24px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid #0D0F0D;
+    }
+    .brand {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 22px;
+      background: linear-gradient(135deg, #1FB9D6 0%, #9ADB3C 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    h1 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 26px;
+      margin: 16px 0 4px;
+    }
+    .updated {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: #8A938A;
+    }
+    .lang-nav {
+      display: flex;
+      gap: 8px;
+      margin-top: 18px;
+    }
+    .lang-nav a {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      font-weight: 600;
+      text-decoration: none;
+      color: #0D0F0D;
+      background: #fff;
+      border: 1.5px solid #0D0F0D;
+      border-radius: 20px;
+      padding: 6px 14px;
+    }
+    .section-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 700;
+      font-size: 22px;
+      margin: 56px 0 6px;
+      padding-top: 24px;
+      border-top: 2px solid #0D0F0D;
+    }
+    .section-sub {
+      font-size: 13px;
+      color: #576257;
+      margin-bottom: 24px;
+    }
+    h2 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 600;
+      font-size: 16px;
+      margin: 32px 0 4px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    h2::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #1FB9D6;
+      flex-shrink: 0;
+    }
+    .tab-label {
+      display: inline-block;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      color: #576257;
+      background: #EFF3EF;
+      border: 1px solid #E1E6E1;
+      border-radius: 4px;
+      padding: 2px 7px;
+      margin-bottom: 8px;
+    }
+    p, li { font-size: 14.5px; color: #2A2F2A; }
+    ul, ol { padding-left: 20px; margin: 8px 0; }
+    li { margin-bottom: 6px; }
+    .card {
+      background: #fff;
+      border: 1.5px solid #E1E6E1;
+      border-radius: 8px;
+      padding: 16px 18px;
+      margin-top: 10px;
+    }
+    .tip {
+      background: #EFFBE3;
+      border: 1.5px solid #C9A227;
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-top: 10px;
+      font-size: 13.5px;
+    }
+    .tip strong { color: #8a7415; }
+    footer {
+      margin-top: 56px;
+      padding-top: 20px;
+      border-top: 1px solid #E1E6E1;
+      font-size: 12px;
+      color: #8A938A;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand">Uply</div>
+      <h1>Guide d'utilisation / User Guide</h1>
+      <div class="updated">Mis à jour le / Updated: 22 juillet 2026</div>
+      <div class="lang-nav">
+        <a href="#fr">🇫🇷 Français</a>
+        <a href="#en">🇬🇧 English</a>
+      </div>
+    </header>
+
+    <!-- ============================================================ -->
+    <!-- FRANÇAIS -->
+    <!-- ============================================================ -->
+    <div id="fr">
+      <div class="section-title">🇫🇷 Espace Administrateur</div>
+      <div class="section-sub">C'est votre espace pour tout gérer : restaurants, catalogue, commandes et comptes clients.</div>
+
+      <h2>Connexion</h2>
+      <p>Connectez-vous avec votre e-mail et votre mot de passe sur la page d'accueil. Si vous oubliez votre mot de passe, utilisez le lien « Mot de passe oublié ? » pour en recevoir un nouveau par e-mail.</p>
+
+      <h2>Accueil</h2>
+      <span class="tab-label">ONGLET : ACCUEIL</span>
+      <p>Vue d'ensemble en un coup d'œil : nombre de restaurants, produits actifs, commandes en cours, commandes à préparer, et demandes de produits à traiter.</p>
+
+      <h2>Ajouter un restaurant (client)</h2>
+      <span class="tab-label">ONGLET : RESTAURANTS</span>
+      <div class="card">
+        <ol>
+          <li>Entrez le nom du restaurant dans le champ en haut, puis cliquez sur <strong>+ Créer</strong>.</li>
+          <li>Cliquez sur l'icône crayon à côté du restaurant pour ajouter le nom du propriétaire, l'adresse et le téléphone.</li>
+        </ol>
+      </div>
+      <div class="tip"><strong>Astuce :</strong> créer le restaurant ici est la première étape avant de pouvoir lui ajouter des produits ou un compte utilisateur.</div>
+
+      <h2>Ajouter des produits au catalogue</h2>
+      <span class="tab-label">ONGLET : PRODUITS</span>
+      <p>Pour chaque restaurant, ajoutez les produits qu'il peut commander : nom, catégorie, unité, prix et fournisseur. Vous pouvez activer/désactiver un produit ou marquer « en rupture de stock » sans le supprimer.</p>
+
+      <h2>Gérer les fournisseurs</h2>
+      <span class="tab-label">ONGLET : FOURNISSEURS</span>
+      <p>Ajoutez vos fournisseurs et leurs jours de livraison habituels. Vous pouvez ensuite associer un produit à un ou plusieurs fournisseurs depuis la fiche produit.</p>
+
+      <h2>Traiter les demandes de nouveaux produits</h2>
+      <span class="tab-label">ONGLET : DEMANDES</span>
+      <p>Quand un restaurant demande un produit qui n'est pas encore au catalogue, la demande apparaît ici. Vous pouvez la valider (puis l'ajouter au catalogue) ou la refuser.</p>
+
+      <h2>Gérer les commandes</h2>
+      <span class="tab-label">ONGLET : COMMANDES</span>
+      <p>Toutes les commandes passées par les restaurants apparaissent ici. Faites avancer chaque commande selon son statut :</p>
+      <div class="card">
+        <strong>En attente</strong> → <strong>En préparation</strong> → <strong>En livraison</strong> → <strong>Livrée</strong>
+      </div>
+      <p>Dès qu'une commande passe à « Livrée », elle est automatiquement déplacée vers les Archives.</p>
+
+      <h2>Consulter les commandes livrées</h2>
+      <span class="tab-label">ONGLET : ARCHIVES</span>
+      <p>Historique de toutes les commandes déjà livrées, pour retrouver une commande passée sans encombrer la liste principale.</p>
+
+      <h2>Passer une commande pour un restaurant (en personne)</h2>
+      <span class="tab-label">ONGLET : COMMANDER</span>
+      <p>Si vous visitez un restaurant en personne et prenez sa commande vous-même, utilisez cet onglet : choisissez le restaurant, sélectionnez les produits, puis validez. La commande est enregistrée exactement comme si le restaurant l'avait passée lui-même.</p>
+
+      <h2>Inviter un nouveau compte client</h2>
+      <span class="tab-label">ONGLET : UTILISATEURS</span>
+      <div class="card">
+        <ol>
+          <li>Entrez le nom, l'e-mail de la personne, et choisissez son restaurant.</li>
+          <li>Cliquez sur <strong>+ Inviter</strong>.</li>
+          <li>La personne reçoit un e-mail avec un lien pour définir son propre mot de passe et se connecter.</li>
+        </ol>
+      </div>
+
+      <h2>Notifications</h2>
+      <p>La cloche en haut de l'écran vous alerte dès qu'une nouvelle commande arrive, avec un e-mail de secours envoyé en parallèle (avec le bon de commande en pièce jointe).</p>
+
+      <hr style="border: none; border-top: 1px solid #E1E6E1; margin: 48px 0;" />
+
+      <div class="section-title" style="border-top: none; margin-top: 0; padding-top: 0;">🇫🇷 Espace Restaurant (Client)</div>
+      <div class="section-sub">C'est l'espace que voient vos restaurants clients pour passer leurs commandes.</div>
+
+      <h2>Première connexion</h2>
+      <p>Le restaurant reçoit un e-mail d'invitation. En cliquant sur le lien, il définit son propre mot de passe, puis peut se connecter normalement à partir de là.</p>
+
+      <h2>Accueil</h2>
+      <p>Point de départ avec accès rapide : nouvelle commande, mes commandes, mes factures, favoris, commande rapide et notifications.</p>
+
+      <h2>Commande rapide</h2>
+      <p>Suggère automatiquement les produits habituellement commandés, pour recommander en quelques clics sans parcourir tout le catalogue.</p>
+
+      <h2>Catalogue</h2>
+      <p>Liste complète des produits disponibles pour ce restaurant. On peut ajuster les quantités, marquer un produit en favori, ou demander un produit qui n'y figure pas encore.</p>
+
+      <h2>Panier</h2>
+      <p>Vérifier les quantités, ajouter un commentaire à la commande, puis valider pour l'envoyer à l'administrateur.</p>
+
+      <h2>Mes commandes</h2>
+      <p>Suivi du statut de chaque commande passée. Le bouton « Recommander » remplit à nouveau le panier avec les mêmes produits.</p>
+
+      <h2>Mes factures</h2>
+      <p>Consultation des factures liées aux commandes livrées.</p>
+
+      <h2>Notifications</h2>
+      <p>Alertes reçues à chaque changement de statut d'une commande (préparation, livraison, etc.).</p>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- ENGLISH -->
+    <!-- ============================================================ -->
+    <div id="en">
+      <div class="section-title">🇬🇧 Admin Space</div>
+      <div class="section-sub">This is where you manage everything: restaurants, catalog, orders, and client accounts.</div>
+
+      <h2>Logging in</h2>
+      <p>Sign in with your email and password on the home page. If you forget your password, use the "Forgot password?" link to receive a new one by email.</p>
+
+      <h2>Home</h2>
+      <span class="tab-label">TAB: HOME</span>
+      <p>An at-a-glance overview: number of restaurants, active products, orders in progress, orders to prepare, and product requests awaiting review.</p>
+
+      <h2>Adding a restaurant (client)</h2>
+      <span class="tab-label">TAB: RESTAURANTS</span>
+      <div class="card">
+        <ol>
+          <li>Type the restaurant's name in the field at the top, then click <strong>+ Create</strong>.</li>
+          <li>Click the pencil icon next to a restaurant to add the owner's name, address, and phone number.</li>
+        </ol>
+      </div>
+      <div class="tip"><strong>Tip:</strong> creating the restaurant here is the first step before you can add products or a login for it.</div>
+
+      <h2>Adding products to the catalog</h2>
+      <span class="tab-label">TAB: PRODUCTS</span>
+      <p>For each restaurant, add the products it can order: name, category, unit, price, and supplier. You can enable/disable a product or mark it "out of stock" without deleting it.</p>
+
+      <h2>Managing suppliers</h2>
+      <span class="tab-label">TAB: SUPPLIERS</span>
+      <p>Add your suppliers and their usual delivery days. You can then link a product to one or more suppliers from the product's detail view.</p>
+
+      <h2>Handling new product requests</h2>
+      <span class="tab-label">TAB: REQUESTS</span>
+      <p>When a restaurant asks for a product that isn't in the catalog yet, the request shows up here. You can approve it (then add it to the catalog) or reject it.</p>
+
+      <h2>Managing orders</h2>
+      <span class="tab-label">TAB: ORDERS</span>
+      <p>Every order placed by a restaurant appears here. Move each order forward through its status:</p>
+      <div class="card">
+        <strong>Pending</strong> → <strong>Preparing</strong> → <strong>Out for delivery</strong> → <strong>Delivered</strong>
+      </div>
+      <p>Once an order is marked "Delivered", it's automatically moved to the Archive.</p>
+
+      <h2>Viewing delivered orders</h2>
+      <span class="tab-label">TAB: ARCHIVE</span>
+      <p>History of every order already delivered, so you can look one up without cluttering the main list.</p>
+
+      <h2>Placing an order for a restaurant (in person)</h2>
+      <span class="tab-label">TAB: PLACE ORDER</span>
+      <p>If you visit a restaurant in person and take their order yourself, use this tab: pick the restaurant, select products, and confirm. The order is recorded exactly as if the restaurant had placed it themselves.</p>
+
+      <h2>Inviting a new client account</h2>
+      <span class="tab-label">TAB: USERS</span>
+      <div class="card">
+        <ol>
+          <li>Enter the person's name, email, and select their restaurant.</li>
+          <li>Click <strong>+ Invite</strong>.</li>
+          <li>They'll receive an email with a link to set their own password and log in.</li>
+        </ol>
+      </div>
+
+      <h2>Notifications</h2>
+      <p>The bell icon at the top alerts you as soon as a new order comes in, with a backup email sent at the same time (with the purchase order attached as a PDF).</p>
+
+      <hr style="border: none; border-top: 1px solid #E1E6E1; margin: 48px 0;" />
+
+      <div class="section-title" style="border-top: none; margin-top: 0; padding-top: 0;">🇬🇧 Restaurant (Client) Space</div>
+      <div class="section-sub">This is what your restaurant clients see when placing their orders.</div>
+
+      <h2>First login</h2>
+      <p>The restaurant receives an invite email. Clicking the link lets them set their own password, after which they can log in normally.</p>
+
+      <h2>Home</h2>
+      <p>Starting point with quick access to: new order, my orders, my invoices, favorites, quick order, and notifications.</p>
+
+      <h2>Quick order</h2>
+      <p>Automatically suggests the products usually ordered, so re-ordering takes a few clicks instead of browsing the whole catalog.</p>
+
+      <h2>Catalog</h2>
+      <p>Full list of products available to this restaurant. Quantities can be adjusted, products marked as favorites, or a missing product requested.</p>
+
+      <h2>Cart</h2>
+      <p>Review quantities, add a comment to the order, then confirm to send it to the admin.</p>
+
+      <h2>My orders</h2>
+      <p>Tracks the status of every order placed. The "Reorder" button refills the cart with the same products.</p>
+
+      <h2>My invoices</h2>
+      <p>View invoices tied to delivered orders.</p>
+
+      <h2>Notifications</h2>
+      <p>Alerts received whenever an order's status changes (preparing, delivery, etc.).</p>
+    </div>
+
+    <footer>
+      Uply — Réapprovisionnement simplifié pour restaurants
+    </footer>
+  </div>
+</body>
+</html>
