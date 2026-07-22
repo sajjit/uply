@@ -86,6 +86,11 @@ export default function Login({ onLogin }) {
               </button>
             </form>
           )}
+          <div style={{ textAlign: 'center', marginTop: 18 }}>
+            <a href="/politique-de-confidentialite.html" target="_blank" rel="noopener noreferrer" style={{ fontSize: 11, color: '#8A938A' }}>
+              {t('privacyPolicyLink')}
+            </a>
+          </div>
         </div>
       </div>
     </div>
