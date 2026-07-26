@@ -4,12 +4,13 @@ import * as api from '../../lib/api';
 import { PrimaryButton, inputStyle } from '../../components/shared';
 import { useLanguage } from '../../i18n/LanguageContext';
 
-export default function ImportInvoiceModal({ restaurants, products, onClose, onDone }) {
+export default function ImportInvoiceModal({ restaurants, products, categories, onClose, onDone }) {
   const { t } = useLanguage();
   const [restaurantId, setRestaurantId] = useState(restaurants[0]?.id || '');
   const [supplier, setSupplier] = useState('');
   const [invoiceNumber, setInvoiceNumber] = useState('');
-  const [rows, setRows] = useState([{ name: '', category: '', unit: 'kg', price: '' }]);
+  const defaultCategory = categories?.[0]?.name || '';
+  const [rows, setRows] = useState([{ name: '', category: defaultCategory, unit: 'kg', price: '' }]);
   const [busy, setBusy] = useState(false);
   const [reviewing, setReviewing] = useState(false);
 
@@ -18,7 +19,7 @@ export default function ImportInvoiceModal({ restaurants, products, onClose, onD
   }
 
   function addRow() {
-    setRows((prev) => [...prev, { name: '', category: '', unit: 'kg', price: '' }]);
+    setRows((prev) => [...prev, { name: '', category: defaultCategory, unit: 'kg', price: '' }]);
   }
 
   function removeRow(i) {
@@ -108,7 +109,9 @@ export default function ImportInvoiceModal({ restaurants, products, onClose, onD
           {rows.map((row, i) => (
             <div key={i} style={{ display: 'flex', flexWrap: 'wrap', gap: 6, alignItems: 'center' }}>
               <input placeholder={t('productNameShort')} value={row.name} onChange={(e) => updateRow(i, 'name', e.target.value)} style={{ ...inputStyle, flex: '2 1 140px' }} />
-              <input placeholder={t('category')} value={row.category} onChange={(e) => updateRow(i, 'category', e.target.value)} style={{ ...inputStyle, flex: '1 1 90px' }} />
+              <select value={row.category} onChange={(e) => updateRow(i, 'category', e.target.value)} style={{ ...inputStyle, flex: '1 1 90px' }}>
+                {(categories || []).map((c) => <option key={c.id} value={c.name}>{c.name}</option>)}
+              </select>
               <input placeholder={t('unit')} value={row.unit} onChange={(e) => updateRow(i, 'unit', e.target.value)} style={{ ...inputStyle, flex: '0 1 60px' }} />
               <input placeholder={t('price')} type="number" value={row.price} onChange={(e) => updateRow(i, 'price', e.target.value)} style={{ ...inputStyle, flex: '0 1 70px' }} />
               <button onClick={() => removeRow(i)} style={{ background: 'none', border: 'none', color: '#C0392B', padding: 4, flexShrink: 0 }}><Trash2 size={14} /></button>

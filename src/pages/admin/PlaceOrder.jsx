@@ -81,21 +81,11 @@ export default function AdminPlaceOrder({ restaurants, products, profile, onChan
         />
       </div>
 
-      <div style={{ display: 'flex', gap: 6, overflowX: 'auto', marginBottom: 16, paddingBottom: 4 }}>
+      <select value={category} onChange={(e) => setCategory(e.target.value)} style={{ ...inputStyle, width: '100%', marginBottom: 16 }}>
         {categories.map((c) => (
-          <button
-            key={c}
-            onClick={() => setCategory(c)}
-            style={{
-              whiteSpace: 'nowrap', padding: '6px 12px', borderRadius: 20, fontSize: 12, fontWeight: 600,
-              border: '1.5px solid ' + (category === c ? '#0D0F0D' : '#CBD3CB'),
-              background: category === c ? '#0D0F0D' : '#fff', color: category === c ? '#F7F9F7' : '#0D0F0D',
-            }}
-          >
-            {c === 'Toutes' ? t('allCategories') : c}
-          </button>
+          <option key={c} value={c}>{c === 'Toutes' ? t('allCategories') : c}</option>
         ))}
-      </div>
+      </select>
 
       {filtered.length === 0 ? (
         <EmptyState icon={<Search size={32} />} title={t('noProductsFound')} />

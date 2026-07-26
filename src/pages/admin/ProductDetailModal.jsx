@@ -4,7 +4,7 @@ import * as api from '../../lib/api';
 import { PrimaryButton, inputStyle, fmtDate } from '../../components/shared';
 import { useLanguage } from '../../i18n/LanguageContext';
 
-export default function ProductDetailModal({ product, restaurantId, onClose }) {
+export default function ProductDetailModal({ product, onClose }) {
   const { t } = useLanguage();
   const [allSuppliers, setAllSuppliers] = useState([]);
   const [linkedSupplierIds, setLinkedSupplierIds] = useState([]);
@@ -18,7 +18,7 @@ export default function ProductDetailModal({ product, restaurantId, onClose }) {
   async function load() {
     setLoading(true);
     const [{ data: suppliers }, { data: linked }, { data: history }] = await Promise.all([
-      api.fetchSuppliers(restaurantId),
+      api.fetchSuppliers(),
       api.fetchProductSuppliers(product.id),
       api.fetchPriceHistory(product.id),
     ]);
@@ -40,7 +40,7 @@ export default function ProductDetailModal({ product, restaurantId, onClose }) {
 
   async function addNewSupplier() {
     if (!newSupplierName.trim()) return;
-    const { data } = await api.createSupplier(restaurantId, newSupplierName.trim());
+    const { data } = await api.createSupplier(newSupplierName.trim());
     setNewSupplierName('');
     if (data) {
       setAllSuppliers((prev) => [...prev, data]);

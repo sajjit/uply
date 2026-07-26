@@ -36,18 +36,16 @@ export async function deleteProduct(id) {
   return { error };
 }
 
-/* ---------- Suppliers (many-to-many with products) ---------- */
+/* ---------- Suppliers (global list, many-to-many with restaurants and products) ---------- */
 
-export async function fetchSuppliers(restaurantId = null) {
-  let query = supabase.from('suppliers').select('*').order('name');
-  if (restaurantId) query = query.eq('restaurant_id', restaurantId);
-  const { data, error } = await query;
+export async function fetchSuppliers() {
+  const { data, error } = await supabase.from('suppliers').select('*').order('name');
   return { data: data || [], error };
 }
 
-export async function createSupplier(restaurantId, supplier) {
+export async function createSupplier(supplier) {
   const payload = typeof supplier === 'string' ? { name: supplier } : supplier;
-  const { data, error } = await supabase.from('suppliers').insert({ restaurant_id: restaurantId, ...payload }).select().single();
+  const { data, error } = await supabase.from('suppliers').insert(payload).select().single();
   return { data, error };
 }
 
@@ -74,6 +72,43 @@ export async function setProductSuppliers(productId, supplierIds) {
   if (supplierIds.length === 0) return { error: null };
   const rows = supplierIds.map((sid) => ({ product_id: productId, supplier_id: sid }));
   const { error } = await supabase.from('product_suppliers').insert(rows);
+  return { error };
+}
+
+/* ---------- Restaurant <-> supplier links (many-to-many) ---------- */
+
+export async function fetchRestaurantSuppliers() {
+  const { data, error } = await supabase.from('restaurant_suppliers').select('restaurant_id, supplier_id');
+  return { data: data || [], error };
+}
+
+export async function setRestaurantSuppliers(restaurantId, supplierIds) {
+  await supabase.from('restaurant_suppliers').delete().eq('restaurant_id', restaurantId);
+  if (supplierIds.length === 0) return { error: null };
+  const rows = supplierIds.map((sid) => ({ restaurant_id: restaurantId, supplier_id: sid }));
+  const { error } = await supabase.from('restaurant_suppliers').insert(rows);
+  return { error };
+}
+
+/* ---------- Categories (fixed, admin-managed list) ---------- */
+
+export async function fetchCategories() {
+  const { data, error } = await supabase.from('categories').select('*').order('name');
+  return { data: data || [], error };
+}
+
+export async function createCategory(name) {
+  const { data, error } = await supabase.from('categories').insert({ name }).select().single();
+  return { data, error };
+}
+
+export async function updateCategory(id, name) {
+  const { error } = await supabase.from('categories').update({ name }).eq('id', id);
+  return { error };
+}
+
+export async function deleteCategory(id) {
+  const { error } = await supabase.from('categories').delete().eq('id', id);
   return { error };
 }
 

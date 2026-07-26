@@ -21,6 +21,8 @@ export default function AdminApp({ profile, onLogout }) {
   const [restaurants, setRestaurants] = useState([]);
   const [products, setProducts] = useState([]);
   const [suppliers, setSuppliers] = useState([]);
+  const [restaurantSuppliers, setRestaurantSuppliers] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [orders, setOrders] = useState([]);
   const [requests, setRequests] = useState([]);
   const [users, setUsers] = useState([]);
@@ -35,10 +37,12 @@ export default function AdminApp({ profile, onLogout }) {
   // local state (like a just-shown success message).
   async function loadAll(silent = false) {
     if (!silent) setLoading(true);
-    const [r, p, s, o, req, u, n] = await Promise.all([
+    const [r, p, s, rs, c, o, req, u, n] = await Promise.all([
       api.fetchRestaurants(),
       api.fetchProducts(),
       api.fetchSuppliers(),
+      api.fetchRestaurantSuppliers(),
+      api.fetchCategories(),
       api.fetchOrders(),
       api.fetchProductRequests(),
       api.fetchUsers(),
@@ -47,6 +51,8 @@ export default function AdminApp({ profile, onLogout }) {
     setRestaurants(r.data);
     setProducts(p.data);
     setSuppliers(s.data);
+    setRestaurantSuppliers(rs.data);
+    setCategories(c.data);
     setOrders(o.data);
     setRequests(req.data);
     setUsers(u.data);
@@ -129,9 +135,9 @@ export default function AdminApp({ profile, onLogout }) {
       </div>
       <div style={{ maxWidth: 720, margin: '0 auto', padding: 16, paddingBottom: 60 }}>
         {tab === 'home' && <AdminHome restaurants={restaurants} products={products} orders={orders} requests={requests} />}
-        {tab === 'restaurants' && <AdminRestaurants restaurants={restaurants} products={products} users={users} onChange={() => loadAll(true)} />}
-        {tab === 'products' && <AdminProducts restaurants={restaurants} products={products} suppliers={suppliers} onChange={() => loadAll(true)} />}
-        {tab === 'suppliers' && <AdminSuppliers restaurants={restaurants} suppliers={suppliers} onChange={() => loadAll(true)} />}
+        {tab === 'restaurants' && <AdminRestaurants restaurants={restaurants} products={products} users={users} suppliers={suppliers} restaurantSuppliers={restaurantSuppliers} onChange={() => loadAll(true)} />}
+        {tab === 'products' && <AdminProducts restaurants={restaurants} products={products} suppliers={suppliers} categories={categories} onChange={() => loadAll(true)} />}
+        {tab === 'suppliers' && <AdminSuppliers suppliers={suppliers} onChange={() => loadAll(true)} />}
         {tab === 'requests' && <AdminRequests requests={requests} restaurants={restaurants} onChange={() => loadAll(true)} />}
         {tab === 'orders' && <AdminOrders orders={orders} restaurants={restaurants} onChange={() => loadAll(true)} />}
         {tab === 'archive' && <AdminOrders orders={orders} restaurants={restaurants} onChange={() => loadAll(true)} archived />}

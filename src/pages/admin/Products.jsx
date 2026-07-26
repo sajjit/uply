@@ -1,18 +1,56 @@
-import React, { useState } from 'react';
-import { Pencil, Trash2, Package, Info } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Pencil, Trash2, Package, Info, Check, X } from 'lucide-react';
 import * as api from '../../lib/api';
 import { SectionHeader, inputStyle } from '../../components/shared';
 import { useLanguage } from '../../i18n/LanguageContext';
 import ImportInvoiceModal from './ImportInvoiceModal';
 import ProductDetailModal from './ProductDetailModal';
 
-export default function AdminProducts({ restaurants, products, suppliers, onChange }) {
+export default function AdminProducts({ restaurants, products, suppliers, categories, onChange }) {
   const { t } = useLanguage();
   const [form, setForm] = useState({ name: '', restaurant_id: restaurants[0]?.id || '', brand: '', category: '', unit: '', supplier: '', price: '', photo: '📦' });
   const [editing, setEditing] = useState(null);
   const [editForm, setEditForm] = useState({});
   const [showImport, setShowImport] = useState(false);
   const [detailProduct, setDetailProduct] = useState(null);
+  const [showCategoryManager, setShowCategoryManager] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
+  const [editingCategoryId, setEditingCategoryId] = useState(null);
+  const [editingCategoryName, setEditingCategoryName] = useState('');
+
+  // Default the "new product" category to the first entry once the fixed
+  // list has loaded, instead of leaving it blank/mismatched in the <select>.
+  useEffect(() => {
+    if (!form.category && categories && categories.length > 0) {
+      setForm((prev) => (prev.category ? prev : { ...prev, category: categories[0].name }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [categories]);
+
+  async function addCategory() {
+    if (!newCategoryName.trim()) return;
+    await api.createCategory(newCategoryName.trim());
+    setNewCategoryName('');
+    onChange();
+  }
+
+  function startEditCategory(c) {
+    setEditingCategoryId(c.id);
+    setEditingCategoryName(c.name);
+  }
+
+  async function saveCategoryEdit() {
+    if (!editingCategoryName.trim()) return;
+    await api.updateCategory(editingCategoryId, editingCategoryName.trim());
+    setEditingCategoryId(null);
+    onChange();
+  }
+
+  async function removeCategory(c) {
+    if (!window.confirm(t('confirmDeleteCategory'))) return;
+    await api.deleteCategory(c.id);
+    onChange();
+  }
 
   // Trim + case-insensitive dedupe so near-duplicates from old free-text entry
   // (e.g. "Kg" vs "kg", "Unité" vs "Unité ") collapse into one suggestion.
@@ -27,10 +65,12 @@ export default function AdminProducts({ restaurants, products, suppliers, onChan
 
   const unitOptions = dedupeTrimmed(products.map((p) => p.unit));
 
+  // Suppliers are a global list now, so suggestions combine every formal
+  // supplier with whatever's already typed on this restaurant's own products.
   function supplierOptionsFor(restaurantId) {
     return dedupeTrimmed([
       ...products.filter((p) => p.restaurant_id === restaurantId).map((p) => p.supplier),
-      ...(suppliers || []).filter((s) => s.restaurant_id === restaurantId).map((s) => s.name),
+      ...(suppliers || []).map((s) => s.name),
     ]);
   }
   const supplierOptions = supplierOptionsFor(form.restaurant_id);
@@ -82,7 +122,9 @@ export default function AdminProducts({ restaurants, products, suppliers, onChan
               {restaurants.map((r) => <option key={r.id} value={r.id}>{r.name}</option>)}
             </select>
             <input placeholder={t('brand')} value={form.brand} onChange={(e) => setForm({ ...form, brand: e.target.value })} style={inputStyle} />
-            <input placeholder={t('category')} value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} style={inputStyle} />
+            <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} style={inputStyle}>
+              {(categories || []).map((c) => <option key={c.id} value={c.name}>{c.name}</option>)}
+            </select>
             <input placeholder={t('unit')} value={form.unit} onChange={(e) => setForm({ ...form, unit: e.target.value })} style={inputStyle} list="unit-options" />
             <input placeholder={t('supplier')} value={form.supplier} onChange={(e) => setForm({ ...form, supplier: e.target.value })} style={inputStyle} list="supplier-options-new" />
             <input placeholder={t('price')} type="number" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} style={inputStyle} />
@@ -90,6 +132,51 @@ export default function AdminProducts({ restaurants, products, suppliers, onChan
           <button onClick={addProduct} style={{ width: '100%', background: '#1FB9D6', color: '#fff', border: 'none', borderRadius: 6, padding: 10, fontWeight: 600 }}>
             + {t('addProduct')}
           </button>
+          <button
+            type="button"
+            onClick={() => setShowCategoryManager((v) => !v)}
+            style={{ width: '100%', background: 'none', border: 'none', color: '#576257', fontSize: 11, marginTop: 8, padding: 4, textDecoration: 'underline' }}
+          >
+            {showCategoryManager ? t('hideCategoryManager') : t('manageCategoriesLink')}
+          </button>
+          {showCategoryManager && (
+            <div style={{ marginTop: 8, borderTop: '1px solid #E1E6E1', paddingTop: 10 }}>
+              <div style={{ display: 'flex', gap: 6, marginBottom: 8 }}>
+                <input
+                  placeholder={t('newCategoryPlaceholder')}
+                  value={newCategoryName}
+                  onChange={(e) => setNewCategoryName(e.target.value)}
+                  style={{ ...inputStyle, flex: 1 }}
+                />
+                <button onClick={addCategory} style={{ background: '#0D0F0D', color: '#fff', border: 'none', borderRadius: 6, padding: '0 14px', fontWeight: 600, fontSize: 12 }}>
+                  + {t('add')}
+                </button>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                {(categories || []).map((c) => (
+                  <div key={c.id} style={{ display: 'flex', alignItems: 'center', gap: 6, background: '#F7F9F7', border: '1px solid #E1E6E1', borderRadius: 6, padding: '5px 8px' }}>
+                    {editingCategoryId === c.id ? (
+                      <>
+                        <input
+                          value={editingCategoryName}
+                          onChange={(e) => setEditingCategoryName(e.target.value)}
+                          style={{ ...inputStyle, flex: 1, padding: '4px 8px', fontSize: 12 }}
+                        />
+                        <button onClick={saveCategoryEdit} style={{ background: 'none', border: 'none', color: '#5A9C3E', padding: 4 }}><Check size={14} /></button>
+                        <button onClick={() => setEditingCategoryId(null)} style={{ background: 'none', border: 'none', color: '#8A938A', padding: 4 }}><X size={14} /></button>
+                      </>
+                    ) : (
+                      <>
+                        <span style={{ flex: 1, fontSize: 12 }}>{c.name}</span>
+                        <button onClick={() => startEditCategory(c)} style={{ background: 'none', border: 'none', color: '#0D0F0D', padding: 4 }}><Pencil size={12} /></button>
+                        <button onClick={() => removeCategory(c)} style={{ background: 'none', border: 'none', color: '#C0392B', padding: 4 }}><Trash2 size={12} /></button>
+                      </>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
           <datalist id="unit-options">
             {unitOptions.map((u) => <option key={u} value={u} />)}
           </datalist>
@@ -112,6 +199,7 @@ export default function AdminProducts({ restaurants, products, suppliers, onChan
         <ImportInvoiceModal
           restaurants={restaurants}
           products={products}
+          categories={categories}
           onClose={() => setShowImport(false)}
           onDone={() => { setShowImport(false); onChange(); }}
         />
@@ -134,7 +222,12 @@ export default function AdminProducts({ restaurants, products, suppliers, onChan
                       <div className="uply-form-grid" style={{ marginBottom: 8 }}>
                         <input placeholder={t('productNameShort')} value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} style={inputStyle} />
                         <input placeholder={t('brand')} value={editForm.brand || ''} onChange={(e) => setEditForm({ ...editForm, brand: e.target.value })} style={inputStyle} />
-                        <input placeholder={t('category')} value={editForm.category || ''} onChange={(e) => setEditForm({ ...editForm, category: e.target.value })} style={inputStyle} />
+                        <select value={editForm.category || ''} onChange={(e) => setEditForm({ ...editForm, category: e.target.value })} style={inputStyle}>
+                          {editForm.category && !(categories || []).some((c) => c.name === editForm.category) && (
+                            <option value={editForm.category}>{editForm.category} ({t('legacyCategoryTag')})</option>
+                          )}
+                          {(categories || []).map((c) => <option key={c.id} value={c.name}>{c.name}</option>)}
+                        </select>
                         <input placeholder={t('unit')} value={editForm.unit || ''} onChange={(e) => setEditForm({ ...editForm, unit: e.target.value })} style={inputStyle} list="unit-options" />
                         <input placeholder={t('supplier')} value={editForm.supplier || ''} onChange={(e) => setEditForm({ ...editForm, supplier: e.target.value })} style={inputStyle} list="supplier-options-edit" />
                         <input placeholder={t('price')} type="number" value={editForm.price} onChange={(e) => setEditForm({ ...editForm, price: e.target.value })} style={inputStyle} />
@@ -177,7 +270,6 @@ export default function AdminProducts({ restaurants, products, suppliers, onChan
       {detailProduct && (
         <ProductDetailModal
           product={detailProduct}
-          restaurantId={detailProduct.restaurant_id}
           onClose={() => setDetailProduct(null)}
         />
       )}

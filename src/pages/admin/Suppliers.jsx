@@ -35,16 +35,15 @@ function DaysPicker({ value, onChange }) {
   );
 }
 
-export default function AdminSuppliers({ restaurants, suppliers, onChange }) {
+export default function AdminSuppliers({ suppliers, onChange }) {
   const { t } = useLanguage();
-  const [restaurantId, setRestaurantId] = useState(restaurants[0]?.id || '');
   const [form, setForm] = useState(emptyForm);
   const [editing, setEditing] = useState(null);
   const [editForm, setEditForm] = useState(emptyForm);
 
   async function add() {
-    if (!form.name.trim() || !restaurantId) return;
-    await api.createSupplier(restaurantId, {
+    if (!form.name.trim()) return;
+    await api.createSupplier({
       name: form.name.trim(),
       phone: form.phone.trim() || null,
       email: form.email.trim() || null,
@@ -91,9 +90,6 @@ export default function AdminSuppliers({ restaurants, suppliers, onChange }) {
       <div style={{ background: '#fff', border: '1.5px solid #0D0F0D', borderRadius: 8, padding: 14, marginBottom: 20 }}>
         <div className="uply-mono" style={{ fontSize: 11, marginBottom: 10, color: '#576257' }}>{t('newSupplier')}</div>
         <div className="uply-form-grid" style={{ marginBottom: 8 }}>
-          <select value={restaurantId} onChange={(e) => setRestaurantId(e.target.value)} style={inputStyle}>
-            {restaurants.map((r) => <option key={r.id} value={r.id}>{r.name}</option>)}
-          </select>
           <input placeholder={t('supplierNamePlaceholder')} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} style={inputStyle} />
           <input placeholder={t('supplierPhone')} value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} style={inputStyle} />
           <input placeholder={t('supplierEmail')} type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} style={inputStyle} />
@@ -108,58 +104,51 @@ export default function AdminSuppliers({ restaurants, suppliers, onChange }) {
         </button>
       </div>
 
-      {restaurants.map((r) => {
-        const rs = suppliers.filter((s) => s.restaurant_id === r.id);
-        if (rs.length === 0) return null;
-        return (
-          <div key={r.id} style={{ marginBottom: 18 }}>
-            <div className="uply-mono" style={{ fontSize: 11, color: '#576257', marginBottom: 8 }}>{r.name.toUpperCase()}</div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-              {rs.map((s) => {
-                const isEditing = editing === s.id;
-                if (isEditing) {
-                  return (
-                    <div key={s.id} style={{ background: '#EFFBE3', border: '1.5px solid #C9A227', borderRadius: 8, padding: 12 }}>
-                      <div className="uply-form-grid" style={{ marginBottom: 8 }}>
-                        <input placeholder={t('supplierNamePlaceholder')} value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} style={inputStyle} />
-                        <input placeholder={t('supplierPhone')} value={editForm.phone} onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })} style={inputStyle} />
-                        <input placeholder={t('supplierEmail')} type="email" value={editForm.email} onChange={(e) => setEditForm({ ...editForm, email: e.target.value })} style={inputStyle} />
-                        <input placeholder={t('supplierLeadTime')} type="number" min="0" value={editForm.lead_time_days} onChange={(e) => setEditForm({ ...editForm, lead_time_days: e.target.value })} style={inputStyle} />
-                      </div>
-                      <div className="uply-mono" style={{ fontSize: 10, color: '#576257', marginBottom: 6 }}>{t('supplierDeliveryDays')}</div>
-                      <div style={{ marginBottom: 10 }}>
-                        <DaysPicker value={editForm.delivery_days} onChange={(v) => setEditForm({ ...editForm, delivery_days: v })} />
-                      </div>
-                      <div style={{ display: 'flex', gap: 6 }}>
-                        <button onClick={saveEdit} style={{ flex: 1, background: '#5A9C3E', color: '#fff', border: 'none', borderRadius: 6, padding: 8, fontSize: 12, fontWeight: 600 }}>{t('save')}</button>
-                        <button onClick={() => setEditing(null)} style={{ flex: 1, background: '#fff', border: '1px solid #CBD3CB', borderRadius: 6, padding: 8, fontSize: 12 }}>{t('cancel')}</button>
-                      </div>
-                    </div>
-                  );
-                }
-                const days = s.delivery_days ? s.delivery_days.split(',').filter(Boolean) : [];
-                return (
-                  <div key={s.id} style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 10, background: '#fff', border: '1px solid #E1E6E1', borderRadius: 8, padding: 10 }}>
-                    <div style={{ flex: '1 1 200px', minWidth: 0 }}>
-                      <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 4 }}>{s.name}</div>
-                      <div className="uply-mono" style={{ fontSize: 10, color: '#8A938A', display: 'flex', flexWrap: 'wrap', gap: 10 }}>
-                        {s.phone && <span style={{ display: 'flex', alignItems: 'center', gap: 3 }}><Phone size={10} /> {s.phone}</span>}
-                        {s.email && <span style={{ display: 'flex', alignItems: 'center', gap: 3 }}><Mail size={10} /> {s.email}</span>}
-                        {s.lead_time_days != null && <span style={{ display: 'flex', alignItems: 'center', gap: 3 }}><Clock size={10} /> {t('leadTimeDays', { count: s.lead_time_days })}</span>}
-                        {days.length > 0 && <span style={{ display: 'flex', alignItems: 'center', gap: 3 }}><Truck size={10} /> {days.join(', ')}</span>}
-                      </div>
-                    </div>
-                    <div style={{ display: 'flex', gap: 6 }}>
-                      <button onClick={() => startEdit(s)} title={t('edit')} style={{ background: 'none', border: '1px solid #CBD3CB', borderRadius: 4, padding: 6, color: '#0D0F0D' }}><Pencil size={13} /></button>
-                      <button onClick={() => remove(s.id)} title={t('delete')} style={{ background: 'none', border: '1px solid #CBD3CB', borderRadius: 4, padding: 6, color: '#C0392B' }}><Trash2 size={13} /></button>
-                    </div>
-                  </div>
-                );
-              })}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+        {suppliers.length === 0 ? (
+          <div style={{ fontSize: 13, color: '#8A938A', padding: '12px 0' }}>{t('noSuppliersYet')}</div>
+        ) : suppliers.map((s) => {
+          const isEditing = editing === s.id;
+          if (isEditing) {
+            return (
+              <div key={s.id} style={{ background: '#EFFBE3', border: '1.5px solid #C9A227', borderRadius: 8, padding: 12 }}>
+                <div className="uply-form-grid" style={{ marginBottom: 8 }}>
+                  <input placeholder={t('supplierNamePlaceholder')} value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} style={inputStyle} />
+                  <input placeholder={t('supplierPhone')} value={editForm.phone} onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })} style={inputStyle} />
+                  <input placeholder={t('supplierEmail')} type="email" value={editForm.email} onChange={(e) => setEditForm({ ...editForm, email: e.target.value })} style={inputStyle} />
+                  <input placeholder={t('supplierLeadTime')} type="number" min="0" value={editForm.lead_time_days} onChange={(e) => setEditForm({ ...editForm, lead_time_days: e.target.value })} style={inputStyle} />
+                </div>
+                <div className="uply-mono" style={{ fontSize: 10, color: '#576257', marginBottom: 6 }}>{t('supplierDeliveryDays')}</div>
+                <div style={{ marginBottom: 10 }}>
+                  <DaysPicker value={editForm.delivery_days} onChange={(v) => setEditForm({ ...editForm, delivery_days: v })} />
+                </div>
+                <div style={{ display: 'flex', gap: 6 }}>
+                  <button onClick={saveEdit} style={{ flex: 1, background: '#5A9C3E', color: '#fff', border: 'none', borderRadius: 6, padding: 8, fontSize: 12, fontWeight: 600 }}>{t('save')}</button>
+                  <button onClick={() => setEditing(null)} style={{ flex: 1, background: '#fff', border: '1px solid #CBD3CB', borderRadius: 6, padding: 8, fontSize: 12 }}>{t('cancel')}</button>
+                </div>
+              </div>
+            );
+          }
+          const days = s.delivery_days ? s.delivery_days.split(',').filter(Boolean) : [];
+          return (
+            <div key={s.id} style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 10, background: '#fff', border: '1px solid #E1E6E1', borderRadius: 8, padding: 10 }}>
+              <div style={{ flex: '1 1 200px', minWidth: 0 }}>
+                <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 4 }}>{s.name}</div>
+                <div className="uply-mono" style={{ fontSize: 10, color: '#8A938A', display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+                  {s.phone && <span style={{ display: 'flex', alignItems: 'center', gap: 3 }}><Phone size={10} /> {s.phone}</span>}
+                  {s.email && <span style={{ display: 'flex', alignItems: 'center', gap: 3 }}><Mail size={10} /> {s.email}</span>}
+                  {s.lead_time_days != null && <span style={{ display: 'flex', alignItems: 'center', gap: 3 }}><Clock size={10} /> {t('leadTimeDays', { count: s.lead_time_days })}</span>}
+                  {days.length > 0 && <span style={{ display: 'flex', alignItems: 'center', gap: 3 }}><Truck size={10} /> {days.join(', ')}</span>}
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: 6 }}>
+                <button onClick={() => startEdit(s)} title={t('edit')} style={{ background: 'none', border: '1px solid #CBD3CB', borderRadius: 4, padding: 6, color: '#0D0F0D' }}><Pencil size={13} /></button>
+                <button onClick={() => remove(s.id)} title={t('delete')} style={{ background: 'none', border: '1px solid #CBD3CB', borderRadius: 4, padding: 6, color: '#C0392B' }}><Trash2 size={13} /></button>
+              </div>
             </div>
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
     </div>
   );
 }

@@ -4,12 +4,12 @@ import * as api from '../../lib/api';
 import { SectionHeader, inputStyle } from '../../components/shared';
 import { useLanguage } from '../../i18n/LanguageContext';
 
-export default function AdminRestaurants({ restaurants, products, users, onChange }) {
+export default function AdminRestaurants({ restaurants, products, users, suppliers, restaurantSuppliers, onChange }) {
   const { t } = useLanguage();
   const [name, setName] = useState('');
   const [busy, setBusy] = useState(false);
   const [editing, setEditing] = useState(null);
-  const [editForm, setEditForm] = useState({ ownerName: '', address: '', phone: '' });
+  const [editForm, setEditForm] = useState({ ownerName: '', address: '', phone: '', supplierIds: [] });
   const [error, setError] = useState(null);
 
   async function add() {
@@ -33,7 +33,15 @@ export default function AdminRestaurants({ restaurants, products, users, onChang
 
   function startEdit(r) {
     setEditing(r.id);
-    setEditForm({ ownerName: r.owner_name || '', address: r.address || '', phone: r.phone || '' });
+    const linkedSupplierIds = restaurantSuppliers.filter((rs) => rs.restaurant_id === r.id).map((rs) => rs.supplier_id);
+    setEditForm({ ownerName: r.owner_name || '', address: r.address || '', phone: r.phone || '', supplierIds: linkedSupplierIds });
+  }
+
+  function toggleSupplier(supplierId) {
+    setEditForm((prev) => {
+      const has = prev.supplierIds.includes(supplierId);
+      return { ...prev, supplierIds: has ? prev.supplierIds.filter((id) => id !== supplierId) : [...prev.supplierIds, supplierId] };
+    });
   }
 
   async function saveEdit() {
@@ -42,6 +50,7 @@ export default function AdminRestaurants({ restaurants, products, users, onChang
       address: editForm.address.trim() || null,
       phone: editForm.phone.trim() || null,
     });
+    await api.setRestaurantSuppliers(editing, editForm.supplierIds);
     setEditing(null);
     onChange();
   }
@@ -77,6 +86,29 @@ export default function AdminRestaurants({ restaurants, products, users, onChang
                   <input placeholder={t('restaurantOwnerName')} value={editForm.ownerName} onChange={(e) => setEditForm({ ...editForm, ownerName: e.target.value })} style={inputStyle} />
                   <input placeholder={t('restaurantAddress')} value={editForm.address} onChange={(e) => setEditForm({ ...editForm, address: e.target.value })} style={inputStyle} />
                   <input placeholder={t('restaurantPhone')} value={editForm.phone} onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })} style={inputStyle} />
+                </div>
+                <div className="uply-mono" style={{ fontSize: 10, color: '#576257', marginBottom: 6 }}>{t('restaurantSuppliers')}</div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 10 }}>
+                  {(suppliers || []).length === 0 ? (
+                    <span style={{ fontSize: 11, color: '#8A938A' }}>{t('noSuppliersYet')}</span>
+                  ) : (suppliers || []).map((s) => {
+                    const active = editForm.supplierIds.includes(s.id);
+                    return (
+                      <button
+                        key={s.id}
+                        type="button"
+                        onClick={() => toggleSupplier(s.id)}
+                        style={{
+                          fontSize: 11, fontWeight: 600, padding: '5px 9px', borderRadius: 14,
+                          border: '1.5px solid ' + (active ? '#0D0F0D' : '#CBD3CB'),
+                          background: active ? '#0D0F0D' : '#fff',
+                          color: active ? '#fff' : '#0D0F0D',
+                        }}
+                      >
+                        {s.name}
+                      </button>
+                    );
+                  })}
                 </div>
                 <div style={{ display: 'flex', gap: 6 }}>
                   <button onClick={saveEdit} style={{ flex: 1, background: '#5A9C3E', color: '#fff', border: 'none', borderRadius: 6, padding: 8, fontSize: 12, fontWeight: 600 }}>{t('save')}</button>
