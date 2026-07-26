@@ -18,14 +18,21 @@ export default function AdminProducts({ restaurants, products, suppliers, catego
   const [editingCategoryId, setEditingCategoryId] = useState(null);
   const [editingCategoryName, setEditingCategoryName] = useState('');
 
-  // Default the "new product" category to the first entry once the fixed
-  // list has loaded, instead of leaving it blank/mismatched in the <select>.
+  // Default the "new product" category/supplier to the first entry once
+  // those lists have loaded, instead of leaving the <select> blank/mismatched.
   useEffect(() => {
     if (!form.category && categories && categories.length > 0) {
       setForm((prev) => (prev.category ? prev : { ...prev, category: categories[0].name }));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [categories]);
+
+  useEffect(() => {
+    if (!form.supplier && suppliers && suppliers.length > 0) {
+      setForm((prev) => (prev.supplier ? prev : { ...prev, supplier: suppliers[0].name }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [suppliers]);
 
   async function addCategory() {
     if (!newCategoryName.trim()) return;
@@ -64,17 +71,6 @@ export default function AdminProducts({ restaurants, products, suppliers, catego
   }
 
   const unitOptions = dedupeTrimmed(products.map((p) => p.unit));
-
-  // Suppliers are a global list now, so suggestions combine every formal
-  // supplier with whatever's already typed on this restaurant's own products.
-  function supplierOptionsFor(restaurantId) {
-    return dedupeTrimmed([
-      ...products.filter((p) => p.restaurant_id === restaurantId).map((p) => p.supplier),
-      ...(suppliers || []).map((s) => s.name),
-    ]);
-  }
-  const supplierOptions = supplierOptionsFor(form.restaurant_id);
-  const editSupplierOptions = supplierOptionsFor(products.find((p) => p.id === editing)?.restaurant_id);
 
   async function addProduct() {
     if (!form.name.trim() || !form.restaurant_id) return;
@@ -126,7 +122,10 @@ export default function AdminProducts({ restaurants, products, suppliers, catego
               {(categories || []).map((c) => <option key={c.id} value={c.name}>{c.name}</option>)}
             </select>
             <input placeholder={t('unit')} value={form.unit} onChange={(e) => setForm({ ...form, unit: e.target.value })} style={inputStyle} list="unit-options" />
-            <input placeholder={t('supplier')} value={form.supplier} onChange={(e) => setForm({ ...form, supplier: e.target.value })} style={inputStyle} list="supplier-options-new" />
+            <select value={form.supplier} onChange={(e) => setForm({ ...form, supplier: e.target.value })} style={inputStyle}>
+              {(suppliers || []).length === 0 && <option value="">{t('noSuppliersYet')}</option>}
+              {(suppliers || []).map((s) => <option key={s.id} value={s.name}>{s.name}</option>)}
+            </select>
             <input placeholder={t('price')} type="number" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} style={inputStyle} />
           </div>
           <button onClick={addProduct} style={{ width: '100%', background: '#1FB9D6', color: '#fff', border: 'none', borderRadius: 6, padding: 10, fontWeight: 600 }}>
@@ -180,12 +179,6 @@ export default function AdminProducts({ restaurants, products, suppliers, catego
           <datalist id="unit-options">
             {unitOptions.map((u) => <option key={u} value={u} />)}
           </datalist>
-          <datalist id="supplier-options-new">
-            {supplierOptions.map((s) => <option key={s} value={s} />)}
-          </datalist>
-          <datalist id="supplier-options-edit">
-            {editSupplierOptions.map((s) => <option key={s} value={s} />)}
-          </datalist>
         </div>
         <button
           onClick={() => setShowImport(true)}
@@ -229,7 +222,12 @@ export default function AdminProducts({ restaurants, products, suppliers, catego
                           {(categories || []).map((c) => <option key={c.id} value={c.name}>{c.name}</option>)}
                         </select>
                         <input placeholder={t('unit')} value={editForm.unit || ''} onChange={(e) => setEditForm({ ...editForm, unit: e.target.value })} style={inputStyle} list="unit-options" />
-                        <input placeholder={t('supplier')} value={editForm.supplier || ''} onChange={(e) => setEditForm({ ...editForm, supplier: e.target.value })} style={inputStyle} list="supplier-options-edit" />
+                        <select value={editForm.supplier || ''} onChange={(e) => setEditForm({ ...editForm, supplier: e.target.value })} style={inputStyle}>
+                          {editForm.supplier && !(suppliers || []).some((s) => s.name === editForm.supplier) && (
+                            <option value={editForm.supplier}>{editForm.supplier} ({t('legacyCategoryTag')})</option>
+                          )}
+                          {(suppliers || []).map((s) => <option key={s.id} value={s.name}>{s.name}</option>)}
+                        </select>
                         <input placeholder={t('price')} type="number" value={editForm.price} onChange={(e) => setEditForm({ ...editForm, price: e.target.value })} style={inputStyle} />
                       </div>
                       <div style={{ display: 'flex', gap: 6 }}>

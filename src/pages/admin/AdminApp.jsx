@@ -141,7 +141,7 @@ export default function AdminApp({ profile, onLogout }) {
         {tab === 'requests' && <AdminRequests requests={requests} restaurants={restaurants} onChange={() => loadAll(true)} />}
         {tab === 'orders' && <AdminOrders orders={orders} restaurants={restaurants} onChange={() => loadAll(true)} />}
         {tab === 'archive' && <AdminOrders orders={orders} restaurants={restaurants} onChange={() => loadAll(true)} archived />}
-        {tab === 'placeOrder' && <AdminPlaceOrder restaurants={restaurants} products={products} profile={profile} onChange={() => loadAll(true)} />}
+        {tab === 'placeOrder' && <AdminPlaceOrder restaurants={restaurants} products={products} categories={categories} profile={profile} onChange={() => loadAll(true)} />}
         {tab === 'users' && <AdminUsers restaurants={restaurants} users={users} onChange={() => loadAll(true)} />}
         {tab === 'stats' && <AdminStats />}
       </div>

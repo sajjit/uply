@@ -9,7 +9,7 @@ import { useLanguage } from '../../i18n/LanguageContext';
  * order in person on-site and entering it directly, without the restaurant
  * needing to use the app themselves for that order.
  */
-export default function AdminPlaceOrder({ restaurants, products, profile, onChange }) {
+export default function AdminPlaceOrder({ restaurants, products, categories, profile, onChange }) {
   const { t } = useLanguage();
   const [restaurantId, setRestaurantId] = useState(restaurants[0]?.id || '');
   const [search, setSearch] = useState('');
@@ -29,7 +29,13 @@ export default function AdminPlaceOrder({ restaurants, products, profile, onChan
   }
 
   const restaurantProducts = products.filter((p) => p.restaurant_id === restaurantId && p.active && p.in_stock !== false);
-  const categories = ['Toutes', ...Array.from(new Set(restaurantProducts.map((p) => p.category)))];
+  // Source options from the fixed category list (not raw product.category
+  // strings) so this can't show near-duplicates from old free-text data —
+  // only categories that actually have a product here are offered.
+  const categoryOptions = [
+    'Toutes',
+    ...(categories || []).map((c) => c.name).filter((name) => restaurantProducts.some((p) => p.category === name)),
+  ];
   const byCategory = restaurantProducts.filter((p) => category === 'Toutes' || p.category === category);
   const filtered = search.trim()
     ? byCategory.filter((p) => p.name.toLowerCase().includes(search.trim().toLowerCase()))
@@ -82,7 +88,7 @@ export default function AdminPlaceOrder({ restaurants, products, profile, onChan
       </div>
 
       <select value={category} onChange={(e) => setCategory(e.target.value)} style={{ ...inputStyle, width: '100%', marginBottom: 16 }}>
-        {categories.map((c) => (
+        {categoryOptions.map((c) => (
           <option key={c} value={c}>{c === 'Toutes' ? t('allCategories') : c}</option>
         ))}
       </select>
