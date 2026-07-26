@@ -13,6 +13,7 @@ export default function AdminPlaceOrder({ restaurants, products, profile, onChan
   const { t } = useLanguage();
   const [restaurantId, setRestaurantId] = useState(restaurants[0]?.id || '');
   const [search, setSearch] = useState('');
+  const [category, setCategory] = useState('Toutes');
   const [cart, setCart] = useState({});
   const [comment, setComment] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -28,9 +29,11 @@ export default function AdminPlaceOrder({ restaurants, products, profile, onChan
   }
 
   const restaurantProducts = products.filter((p) => p.restaurant_id === restaurantId && p.active && p.in_stock !== false);
+  const categories = ['Toutes', ...Array.from(new Set(restaurantProducts.map((p) => p.category)))];
+  const byCategory = restaurantProducts.filter((p) => category === 'Toutes' || p.category === category);
   const filtered = search.trim()
-    ? restaurantProducts.filter((p) => p.name.toLowerCase().includes(search.trim().toLowerCase()))
-    : restaurantProducts;
+    ? byCategory.filter((p) => p.name.toLowerCase().includes(search.trim().toLowerCase()))
+    : byCategory;
 
   const items = Object.entries(cart)
     .map(([id, qty]) => ({ product: products.find((p) => p.id === id), qty }))
@@ -64,11 +67,11 @@ export default function AdminPlaceOrder({ restaurants, products, profile, onChan
         </div>
       )}
 
-      <select value={restaurantId} onChange={(e) => { setRestaurantId(e.target.value); setCart({}); }} style={{ ...inputStyle, width: '100%', marginBottom: 10 }}>
+      <select value={restaurantId} onChange={(e) => { setRestaurantId(e.target.value); setCart({}); setCategory('Toutes'); }} style={{ ...inputStyle, width: '100%', marginBottom: 10 }}>
         {restaurants.map((r) => <option key={r.id} value={r.id}>{r.name}</option>)}
       </select>
 
-      <div style={{ position: 'relative', marginBottom: 16 }}>
+      <div style={{ position: 'relative', marginBottom: 10 }}>
         <Search size={16} style={{ position: 'absolute', left: 12, top: 13, color: '#8A938A' }} />
         <input
           placeholder={t('searchPlaceholder')}
@@ -76,6 +79,22 @@ export default function AdminPlaceOrder({ restaurants, products, profile, onChan
           onChange={(e) => setSearch(e.target.value)}
           style={{ width: '100%', padding: '11px 12px 11px 36px', border: '1.5px solid #CBD3CB', borderRadius: 6, fontSize: 14 }}
         />
+      </div>
+
+      <div style={{ display: 'flex', gap: 6, overflowX: 'auto', marginBottom: 16, paddingBottom: 4 }}>
+        {categories.map((c) => (
+          <button
+            key={c}
+            onClick={() => setCategory(c)}
+            style={{
+              whiteSpace: 'nowrap', padding: '6px 12px', borderRadius: 20, fontSize: 12, fontWeight: 600,
+              border: '1.5px solid ' + (category === c ? '#0D0F0D' : '#CBD3CB'),
+              background: category === c ? '#0D0F0D' : '#fff', color: category === c ? '#F7F9F7' : '#0D0F0D',
+            }}
+          >
+            {c === 'Toutes' ? t('allCategories') : c}
+          </button>
+        ))}
       </div>
 
       {filtered.length === 0 ? (

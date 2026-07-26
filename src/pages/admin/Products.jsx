@@ -6,13 +6,35 @@ import { useLanguage } from '../../i18n/LanguageContext';
 import ImportInvoiceModal from './ImportInvoiceModal';
 import ProductDetailModal from './ProductDetailModal';
 
-export default function AdminProducts({ restaurants, products, onChange }) {
+export default function AdminProducts({ restaurants, products, suppliers, onChange }) {
   const { t } = useLanguage();
   const [form, setForm] = useState({ name: '', restaurant_id: restaurants[0]?.id || '', brand: '', category: '', unit: '', supplier: '', price: '', photo: '📦' });
   const [editing, setEditing] = useState(null);
   const [editForm, setEditForm] = useState({});
   const [showImport, setShowImport] = useState(false);
   const [detailProduct, setDetailProduct] = useState(null);
+
+  // Trim + case-insensitive dedupe so near-duplicates from old free-text entry
+  // (e.g. "Kg" vs "kg", "Unité" vs "Unité ") collapse into one suggestion.
+  function dedupeTrimmed(values) {
+    const map = new Map();
+    for (const raw of values) {
+      const v = (raw || '').trim();
+      if (v && !map.has(v.toLowerCase())) map.set(v.toLowerCase(), v);
+    }
+    return Array.from(map.values());
+  }
+
+  const unitOptions = dedupeTrimmed(products.map((p) => p.unit));
+
+  function supplierOptionsFor(restaurantId) {
+    return dedupeTrimmed([
+      ...products.filter((p) => p.restaurant_id === restaurantId).map((p) => p.supplier),
+      ...(suppliers || []).filter((s) => s.restaurant_id === restaurantId).map((s) => s.name),
+    ]);
+  }
+  const supplierOptions = supplierOptionsFor(form.restaurant_id);
+  const editSupplierOptions = supplierOptionsFor(products.find((p) => p.id === editing)?.restaurant_id);
 
   async function addProduct() {
     if (!form.name.trim() || !form.restaurant_id) return;
@@ -61,13 +83,22 @@ export default function AdminProducts({ restaurants, products, onChange }) {
             </select>
             <input placeholder={t('brand')} value={form.brand} onChange={(e) => setForm({ ...form, brand: e.target.value })} style={inputStyle} />
             <input placeholder={t('category')} value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} style={inputStyle} />
-            <input placeholder={t('unit')} value={form.unit} onChange={(e) => setForm({ ...form, unit: e.target.value })} style={inputStyle} />
-            <input placeholder={t('supplier')} value={form.supplier} onChange={(e) => setForm({ ...form, supplier: e.target.value })} style={inputStyle} />
+            <input placeholder={t('unit')} value={form.unit} onChange={(e) => setForm({ ...form, unit: e.target.value })} style={inputStyle} list="unit-options" />
+            <input placeholder={t('supplier')} value={form.supplier} onChange={(e) => setForm({ ...form, supplier: e.target.value })} style={inputStyle} list="supplier-options-new" />
             <input placeholder={t('price')} type="number" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} style={inputStyle} />
           </div>
           <button onClick={addProduct} style={{ width: '100%', background: '#1FB9D6', color: '#fff', border: 'none', borderRadius: 6, padding: 10, fontWeight: 600 }}>
             + {t('addProduct')}
           </button>
+          <datalist id="unit-options">
+            {unitOptions.map((u) => <option key={u} value={u} />)}
+          </datalist>
+          <datalist id="supplier-options-new">
+            {supplierOptions.map((s) => <option key={s} value={s} />)}
+          </datalist>
+          <datalist id="supplier-options-edit">
+            {editSupplierOptions.map((s) => <option key={s} value={s} />)}
+          </datalist>
         </div>
         <button
           onClick={() => setShowImport(true)}
@@ -86,11 +117,12 @@ export default function AdminProducts({ restaurants, products, onChange }) {
         />
       )}
 
-      {restaurants.map((r) => {
-        const ps = products.filter((p) => p.restaurant_id === r.id);
-        if (ps.length === 0) return null;
+      {(() => {
+        const r = restaurants.find((x) => x.id === form.restaurant_id);
+        const ps = products.filter((p) => p.restaurant_id === form.restaurant_id);
+        if (!r) return null;
         return (
-          <div key={r.id} style={{ marginBottom: 18 }}>
+          <div style={{ marginBottom: 18 }}>
             <div className="uply-mono" style={{ fontSize: 11, color: '#576257', marginBottom: 8 }}>{r.name.toUpperCase()}</div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               {ps.map((p) => {
@@ -103,8 +135,8 @@ export default function AdminProducts({ restaurants, products, onChange }) {
                         <input placeholder={t('productNameShort')} value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} style={inputStyle} />
                         <input placeholder={t('brand')} value={editForm.brand || ''} onChange={(e) => setEditForm({ ...editForm, brand: e.target.value })} style={inputStyle} />
                         <input placeholder={t('category')} value={editForm.category || ''} onChange={(e) => setEditForm({ ...editForm, category: e.target.value })} style={inputStyle} />
-                        <input placeholder={t('unit')} value={editForm.unit || ''} onChange={(e) => setEditForm({ ...editForm, unit: e.target.value })} style={inputStyle} />
-                        <input placeholder={t('supplier')} value={editForm.supplier || ''} onChange={(e) => setEditForm({ ...editForm, supplier: e.target.value })} style={inputStyle} />
+                        <input placeholder={t('unit')} value={editForm.unit || ''} onChange={(e) => setEditForm({ ...editForm, unit: e.target.value })} style={inputStyle} list="unit-options" />
+                        <input placeholder={t('supplier')} value={editForm.supplier || ''} onChange={(e) => setEditForm({ ...editForm, supplier: e.target.value })} style={inputStyle} list="supplier-options-edit" />
                         <input placeholder={t('price')} type="number" value={editForm.price} onChange={(e) => setEditForm({ ...editForm, price: e.target.value })} style={inputStyle} />
                       </div>
                       <div style={{ display: 'flex', gap: 6 }}>
@@ -140,7 +172,7 @@ export default function AdminProducts({ restaurants, products, onChange }) {
             </div>
           </div>
         );
-      })}
+      })()}
 
       {detailProduct && (
         <ProductDetailModal

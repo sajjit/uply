@@ -130,7 +130,7 @@ export default function AdminApp({ profile, onLogout }) {
       <div style={{ maxWidth: 720, margin: '0 auto', padding: 16, paddingBottom: 60 }}>
         {tab === 'home' && <AdminHome restaurants={restaurants} products={products} orders={orders} requests={requests} />}
         {tab === 'restaurants' && <AdminRestaurants restaurants={restaurants} products={products} users={users} onChange={() => loadAll(true)} />}
-        {tab === 'products' && <AdminProducts restaurants={restaurants} products={products} onChange={() => loadAll(true)} />}
+        {tab === 'products' && <AdminProducts restaurants={restaurants} products={products} suppliers={suppliers} onChange={() => loadAll(true)} />}
         {tab === 'suppliers' && <AdminSuppliers restaurants={restaurants} suppliers={suppliers} onChange={() => loadAll(true)} />}
         {tab === 'requests' && <AdminRequests requests={requests} restaurants={restaurants} onChange={() => loadAll(true)} />}
         {tab === 'orders' && <AdminOrders orders={orders} restaurants={restaurants} onChange={() => loadAll(true)} />}
