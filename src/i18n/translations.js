@@ -161,6 +161,7 @@ export const translations = {
     active: "Actif",
     inactive: "Inactif",
     confirmDeleteProduct: "Supprimer ce produit définitivement ?",
+    confirmDeleteOrder: "Supprimer cette commande archivée définitivement ?",
 
     manageSuppliers: "Gestion des fournisseurs",
     newSupplier: "NOUVEAU FOURNISSEUR",
@@ -377,6 +378,7 @@ export const translations = {
     active: "Active",
     inactive: "Inactive",
     confirmDeleteProduct: "Permanently delete this product?",
+    confirmDeleteOrder: "Permanently delete this archived order?",
 
     manageSuppliers: "Manage suppliers",
     newSupplier: "NEW SUPPLIER",

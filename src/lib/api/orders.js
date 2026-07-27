@@ -86,6 +86,11 @@ export async function updateOrderStatus(orderId, status, restaurantId) {
   return { error };
 }
 
+export async function deleteOrder(orderId) {
+  const { error } = await supabase.from('orders').delete().eq('id', orderId);
+  return { error };
+}
+
 export async function updateOrderDelivery(orderId, deliveryDate, deliveryWindow) {
   const { error } = await supabase
     .from('orders')

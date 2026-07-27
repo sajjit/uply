@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { ClipboardList, Calendar, FileText, Download, Truck, Filter } from 'lucide-react';
+import { ClipboardList, Calendar, FileText, Download, Truck, Filter, Trash2 } from 'lucide-react';
 import * as api from '../../lib/api';
 import { generateInvoicePdf, generatePurchaseOrderPdf, generateDeliveryNotePdf, downloadPdf } from '../../lib/pdf/generatePdf';
 import { SectionHeader, EmptyState, StatusTab, STATUS_FR_VALUES, fmtDate, inputStyle } from '../../components/shared';
@@ -70,6 +70,12 @@ export default function AdminOrders({ orders, restaurants, onChange, archived = 
   async function downloadDeliveryNote(order, restaurant) {
     const blob = await generateDeliveryNotePdf(order, restaurant);
     downloadPdf(blob, `bon-de-livraison-${order.id.slice(0, 8)}.pdf`);
+  }
+
+  async function removeOrder(id) {
+    if (!window.confirm(t('confirmDeleteOrder'))) return;
+    await api.deleteOrder(id);
+    onChange();
   }
 
   return (
@@ -168,6 +174,14 @@ export default function AdminOrders({ orders, restaurants, onChange, archived = 
                       style={{ flex: '1 1 130px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, background: o.invoice_url ? '#5A9C3E' : '#1FB9D6', color: '#fff', border: 'none', borderRadius: 6, padding: 8, fontSize: 11, fontWeight: 600 }}
                     >
                       <FileText size={13} /> {sendingInvoice === o.id ? 'Envoi…' : o.invoice_url ? 'Facture envoyée ✓' : 'Envoyer la facture'}
+                    </button>
+                  )}
+                  {archived && (
+                    <button
+                      onClick={() => removeOrder(o.id)}
+                      style={{ flex: '0 1 44px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'none', border: '1px solid #CBD3CB', borderRadius: 6, padding: 8, color: '#C0392B' }}
+                    >
+                      <Trash2 size={13} />
                     </button>
                   )}
                 </div>
