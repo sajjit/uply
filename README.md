@@ -126,7 +126,7 @@ to set the access policies on it.
   Function holding a service-role key — deferred for cost/complexity
   reasons, see project notes.
 - **AI-powered invoice scanning** is deferred (would require a paid
-  Anthropic/OpenAI API call per scan). The current "Importer une facture"
+  AI/OCR API call per scan). The current "Importer une facture"
   flow is fully manual data entry with duplicate detection, which is free.
 
 ## Running locally
