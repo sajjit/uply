@@ -91,6 +91,11 @@ export async function deleteOrder(orderId) {
   return { error };
 }
 
+export async function setOrderItemPrepared(itemId, prepared) {
+  const { error } = await supabase.from('order_items').update({ prepared }).eq('id', itemId);
+  return { error };
+}
+
 export async function updateOrderDelivery(orderId, deliveryDate, deliveryWindow) {
   const { error } = await supabase
     .from('orders')

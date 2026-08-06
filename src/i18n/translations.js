@@ -88,13 +88,13 @@ export const translations = {
     total: "Total",
 
     // Request product
-    suggestProduct: "Proposer un produit",
-    suggestProductDesc: "Ce produit sera envoyé à l'administrateur pour validation.",
+    suggestProduct: "Ajouter un produit",
+    suggestProductDesc: "Ce produit sera ajouté directement à votre catalogue. L'administrateur en sera informé pour vérifier le prix.",
     productNameLabel: "NOM DU PRODUIT",
     productNamePlaceholder: "Ex. Huile d'olive bio",
     commentLabelOptional: "COMMENTAIRE (FACULTATIF)",
     commentPlaceholderHelpful: "Précisions utiles…",
-    sendRequest: "Envoyer la demande",
+    sendRequest: "Ajouter le produit",
 
     // Orders list / detail
     noOrdersYet: "Aucune commande",
@@ -308,13 +308,13 @@ export const translations = {
     itemCount: "{count} item(s)",
     total: "Total",
 
-    suggestProduct: "Suggest a product",
-    suggestProductDesc: "This product will be sent to the admin for approval.",
+    suggestProduct: "Add a product",
+    suggestProductDesc: "This product will be added directly to your catalog. The admin will be notified to check the price.",
     productNameLabel: "PRODUCT NAME",
     productNamePlaceholder: "e.g. Organic olive oil",
     commentLabelOptional: "COMMENT (OPTIONAL)",
     commentPlaceholderHelpful: "Any helpful details…",
-    sendRequest: "Send request",
+    sendRequest: "Add product",
 
     noOrdersYet: "No orders yet",
     orderDetail: "Order detail",

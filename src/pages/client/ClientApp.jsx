@@ -179,7 +179,8 @@ export default function ClientApp({ profile, onLogout }) {
         <RequestProduct
           onBack={() => setTab('catalog')}
           onSubmit={async (name, comment) => {
-            await api.createProductRequest(profile.restaurant_id, name, comment, profile.id);
+            await api.selfAddProduct(profile.restaurant_id, name, comment, restaurant?.name);
+            await loadAll();
             setTab('catalog');
           }}
         />

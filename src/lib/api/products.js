@@ -1,4 +1,5 @@
 import { supabase } from '../supabaseClient';
+import { notifyAdmins } from './notifications';
 
 /* ============================================================
    Products, suppliers, and price history
@@ -9,6 +10,30 @@ export async function fetchProducts(restaurantId = null) {
   if (restaurantId) query = query.eq('restaurant_id', restaurantId);
   const { data, error } = await query;
   return { data: data || [], error };
+}
+
+/**
+ * Lets a client add a product straight to their own restaurant's catalog
+ * (no admin approval needed) — the admin still gets notified so they can set
+ * a real price/category/supplier, since it's created as a placeholder.
+ */
+export async function selfAddProduct(restaurantId, name, comment, restaurantName) {
+  const { data, error } = await createProduct({
+    restaurant_id: restaurantId,
+    name,
+    category: 'Non classé',
+    unit: 'unité',
+    supplier: '—',
+    price: 0,
+    photo: '📦',
+    active: true,
+    in_stock: true,
+  });
+  if (!error) {
+    const suffix = comment ? ` (${comment})` : '';
+    await notifyAdmins(`${restaurantName || 'Un restaurant'} a ajouté un nouveau produit : ${name}${suffix} — pense à vérifier le prix et la catégorie.`);
+  }
+  return { data, error };
 }
 
 export async function createProduct(product) {

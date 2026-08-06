@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { ClipboardList, Calendar, FileText, Download, Truck, Filter, Trash2 } from 'lucide-react';
+import { ClipboardList, Calendar, FileText, Download, Truck, Filter, Trash2, Check } from 'lucide-react';
 import * as api from '../../lib/api';
 import { generateInvoicePdf, generatePurchaseOrderPdf, generateDeliveryNotePdf, downloadPdf } from '../../lib/pdf/generatePdf';
 import { SectionHeader, EmptyState, StatusTab, STATUS_FR_VALUES, fmtDate, inputStyle } from '../../components/shared';
@@ -78,6 +78,11 @@ export default function AdminOrders({ orders, restaurants, onChange, archived = 
     onChange();
   }
 
+  async function togglePrepared(item) {
+    await api.setOrderItemPrepared(item.id, !item.prepared);
+    onChange();
+  }
+
   return (
     <div>
       <SectionHeader title={archived ? t('archivedOrders') : t('allOrders')} />
@@ -117,9 +122,35 @@ export default function AdminOrders({ orders, restaurants, onChange, archived = 
                   </div>
                   <StatusTab status={o.status} />
                 </div>
-                <div style={{ fontSize: 12, color: '#576257', marginBottom: 10 }}>
-                  {(o.order_items || []).map((it) => `${it.name} (${it.qty} ${it.unit})`).join(', ')}
-                </div>
+                {archived ? (
+                  <div style={{ fontSize: 12, color: '#576257', marginBottom: 10 }}>
+                    {(o.order_items || []).map((it) => `${it.name} (${it.qty} ${it.unit})`).join(', ')}
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 10 }}>
+                    {(o.order_items || []).map((it) => (
+                      <button
+                        key={it.id}
+                        onClick={() => togglePrepared(it)}
+                        style={{
+                          display: 'flex', alignItems: 'center', gap: 8, textAlign: 'left', width: '100%',
+                          background: it.prepared ? '#EAF7EC' : '#F7F9F7', border: '1px solid ' + (it.prepared ? '#5A9C3E' : '#E1E6E1'),
+                          borderRadius: 6, padding: '7px 10px', fontSize: 12,
+                        }}
+                      >
+                        <span style={{
+                          flexShrink: 0, width: 16, height: 16, borderRadius: 4, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          border: '1.5px solid ' + (it.prepared ? '#5A9C3E' : '#CBD3CB'), background: it.prepared ? '#5A9C3E' : '#fff',
+                        }}>
+                          {it.prepared && <Check size={11} color="#fff" />}
+                        </span>
+                        <span style={{ color: it.prepared ? '#576257' : '#0D0F0D', textDecoration: it.prepared ? 'line-through' : 'none' }}>
+                          {it.name} ({it.qty} {it.unit})
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                )}
                 {o.comment && <div style={{ fontSize: 12, color: '#576257', marginBottom: 10, background: '#F7F9F7', padding: 8, borderRadius: 6 }}>💬 {o.comment}</div>}
 
                 {editingDelivery === o.id ? (
