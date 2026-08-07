@@ -17,6 +17,7 @@ export default function ClientApp({ profile, onLogout }) {
   const [tab, setTab] = useState('home');
   const [cart, setCart] = useState({});
   const [cartComment, setCartComment] = useState('');
+  const [editingOrderId, setEditingOrderId] = useState(null);
   const [products, setProducts] = useState([]);
   const [orders, setOrders] = useState([]);
   const [restaurant, setRestaurant] = useState(null);
@@ -66,10 +67,15 @@ export default function ClientApp({ profile, onLogout }) {
   async function submitOrder() {
     const items = Object.entries(cart).map(([productId, c]) => {
       const p = products.find((x) => x.id === productId);
-      return { productId, name: p?.name, qty: c.qty, unit: p?.unit, comment: c.comment, unitPrice: p?.price || 0 };
+      return { productId, name: p?.name, qty: c.qty, unit: p?.unit, comment: c.comment, unitPrice: p?.price || 0, supplierRef: p?.supplier_ref };
     });
     if (items.length === 0) return;
-    await api.createOrder(profile.restaurant_id, items, profile.id, cartComment, restaurant?.name);
+    if (editingOrderId) {
+      await api.updateOrderItems(editingOrderId, items, cartComment, restaurant?.name);
+      setEditingOrderId(null);
+    } else {
+      await api.createOrder(profile.restaurant_id, items, profile.id, cartComment, restaurant?.name);
+    }
     setCart({});
     setCartComment('');
     await loadAll();
@@ -83,8 +89,32 @@ export default function ClientApp({ profile, onLogout }) {
         newCart[it.product_id] = { qty: it.qty, comment: it.comment || '' };
       }
     }
+    setEditingOrderId(null);
     setCart(newCart);
+    setCartComment('');
     setTab('cart');
+  }
+
+  // Reopens a still-pending order for editing — same cart machinery as a new
+  // order, but submitOrder() will update it in place instead of creating one.
+  function editOrder(order) {
+    const newCart = {};
+    for (const it of order.order_items || []) {
+      if (it.product_id && products.find((p) => p.id === it.product_id)) {
+        newCart[it.product_id] = { qty: it.qty, comment: it.comment || '' };
+      }
+    }
+    setEditingOrderId(order.id);
+    setCart(newCart);
+    setCartComment(order.comment || '');
+    setTab('cart');
+  }
+
+  function cancelEditOrder() {
+    setEditingOrderId(null);
+    setCart({});
+    setCartComment('');
+    setTab('orders');
   }
 
   if (loading) {
@@ -102,7 +132,7 @@ export default function ClientApp({ profile, onLogout }) {
       {tab === 'home' && (
         <ClientHome
           restaurant={restaurant}
-          onNewOrder={() => setTab('catalog')}
+          onNewOrder={() => { setEditingOrderId(null); setCart({}); setCartComment(''); setTab('catalog'); }}
           onOrders={() => setTab('orders')}
           onInvoices={() => setTab('invoices')}
           onFavorites={() => setTab('favorites')}
@@ -172,14 +202,16 @@ export default function ClientApp({ profile, onLogout }) {
           onSubmit={submitOrder}
           comment={cartComment}
           setComment={setCartComment}
+          editing={!!editingOrderId}
+          onCancelEdit={cancelEditOrder}
         />
       )}
-      {tab === 'orders' && <OrdersList orders={orders} onBack={() => setTab('home')} onReorder={reorder} />}
+      {tab === 'orders' && <OrdersList orders={orders} onBack={() => setTab('home')} onReorder={reorder} onEdit={editOrder} />}
       {tab === 'requestProduct' && (
         <RequestProduct
           onBack={() => setTab('catalog')}
           onSubmit={async (name, comment) => {
-            await api.selfAddProduct(profile.restaurant_id, name, comment, restaurant?.name);
+            await api.selfAddProduct(profile.restaurant_id, name, comment, restaurant?.name, profile.id);
             await loadAll();
             setTab('catalog');
           }}

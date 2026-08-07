@@ -8,7 +8,7 @@ import ProductDetailModal from './ProductDetailModal';
 
 export default function AdminProducts({ restaurants, products, suppliers, categories, onChange }) {
   const { t } = useLanguage();
-  const [form, setForm] = useState({ name: '', restaurant_id: restaurants[0]?.id || '', brand: '', category: '', unit: '', supplier: '', price: '', photo: '📦' });
+  const [form, setForm] = useState({ name: '', restaurant_id: restaurants[0]?.id || '', brand: '', category: '', unit: '', supplier: '', supplier_ref: '', price: '', photo: '📦' });
   const [editing, setEditing] = useState(null);
   const [editForm, setEditForm] = useState({});
   const [showImport, setShowImport] = useState(false);
@@ -17,6 +17,7 @@ export default function AdminProducts({ restaurants, products, suppliers, catego
   const [newCategoryName, setNewCategoryName] = useState('');
   const [editingCategoryId, setEditingCategoryId] = useState(null);
   const [editingCategoryName, setEditingCategoryName] = useState('');
+  const [showClientAddedOnly, setShowClientAddedOnly] = useState(false);
 
   // Default the "new product" category/supplier to the first entry once
   // those lists have loaded, instead of leaving the <select> blank/mismatched.
@@ -75,7 +76,7 @@ export default function AdminProducts({ restaurants, products, suppliers, catego
   async function addProduct() {
     if (!form.name.trim() || !form.restaurant_id) return;
     await api.createProduct({ ...form, price: parseFloat(form.price) || 0, active: true, in_stock: true });
-    setForm({ ...form, name: '', brand: '', category: '', unit: '', supplier: '', price: '' });
+    setForm({ ...form, name: '', brand: '', category: '', unit: '', supplier: '', supplier_ref: '', price: '' });
     onChange();
   }
 
@@ -91,7 +92,7 @@ export default function AdminProducts({ restaurants, products, suppliers, catego
 
   function startEdit(p) {
     setEditing(p.id);
-    setEditForm({ name: p.name, brand: p.brand, category: p.category, unit: p.unit, supplier: p.supplier, price: p.price });
+    setEditForm({ name: p.name, brand: p.brand, category: p.category, unit: p.unit, supplier: p.supplier, supplier_ref: p.supplier_ref || '', price: p.price });
   }
 
   async function saveEdit() {
@@ -126,6 +127,7 @@ export default function AdminProducts({ restaurants, products, suppliers, catego
               {(suppliers || []).length === 0 && <option value="">{t('noSuppliersYet')}</option>}
               {(suppliers || []).map((s) => <option key={s.id} value={s.name}>{s.name}</option>)}
             </select>
+            <input placeholder={t('supplierRef')} value={form.supplier_ref} onChange={(e) => setForm({ ...form, supplier_ref: e.target.value })} style={inputStyle} />
             <input placeholder={t('price')} type="number" value={form.price} onChange={(e) => setForm({ ...form, price: e.target.value })} style={inputStyle} />
           </div>
           <button onClick={addProduct} style={{ width: '100%', background: '#1FB9D6', color: '#fff', border: 'none', borderRadius: 6, padding: 10, fontWeight: 600 }}>
@@ -200,11 +202,27 @@ export default function AdminProducts({ restaurants, products, suppliers, catego
 
       {(() => {
         const r = restaurants.find((x) => x.id === form.restaurant_id);
-        const ps = products.filter((p) => p.restaurant_id === form.restaurant_id);
+        const allForRestaurant = products.filter((p) => p.restaurant_id === form.restaurant_id);
+        const clientAddedCount = allForRestaurant.filter((p) => p.created_by).length;
+        const ps = showClientAddedOnly ? allForRestaurant.filter((p) => p.created_by) : allForRestaurant;
         if (!r) return null;
         return (
           <div style={{ marginBottom: 18 }}>
-            <div className="uply-mono" style={{ fontSize: 11, color: '#576257', marginBottom: 8 }}>{r.name.toUpperCase()}</div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+              <div className="uply-mono" style={{ fontSize: 11, color: '#576257' }}>{r.name.toUpperCase()}</div>
+              {clientAddedCount > 0 && (
+                <button
+                  onClick={() => setShowClientAddedOnly((v) => !v)}
+                  style={{
+                    fontSize: 11, fontWeight: 600, padding: '4px 10px', borderRadius: 20,
+                    border: '1.5px solid ' + (showClientAddedOnly ? '#0D0F0D' : '#CBD3CB'),
+                    background: showClientAddedOnly ? '#0D0F0D' : '#fff', color: showClientAddedOnly ? '#fff' : '#576257',
+                  }}
+                >
+                  {t('clientAddedFilter', { count: clientAddedCount })}
+                </button>
+              )}
+            </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               {ps.map((p) => {
                 const isEditing = editing === p.id;
@@ -228,6 +246,7 @@ export default function AdminProducts({ restaurants, products, suppliers, catego
                           )}
                           {(suppliers || []).map((s) => <option key={s.id} value={s.name}>{s.name}</option>)}
                         </select>
+                        <input placeholder={t('supplierRef')} value={editForm.supplier_ref || ''} onChange={(e) => setEditForm({ ...editForm, supplier_ref: e.target.value })} style={inputStyle} />
                         <input placeholder={t('price')} type="number" value={editForm.price} onChange={(e) => setEditForm({ ...editForm, price: e.target.value })} style={inputStyle} />
                       </div>
                       <div style={{ display: 'flex', gap: 6 }}>
@@ -245,8 +264,11 @@ export default function AdminProducts({ restaurants, products, suppliers, catego
                         <span style={{ fontWeight: 600, fontSize: 13 }}>{p.name}</span>
                         {p.brand && <span className="uply-mono" style={{ fontSize: 10, color: '#576257' }}>({p.brand})</span>}
                         {outOfStock && <span className="uply-mono" style={{ fontSize: 9, background: '#C0392B', color: '#fff', padding: '2px 5px', borderRadius: 3, fontWeight: 700 }}>{t('outOfStock')}</span>}
+                        {p.created_by && <span className="uply-mono" style={{ fontSize: 9, background: '#1FB9D6', color: '#fff', padding: '2px 5px', borderRadius: 3, fontWeight: 700 }}>{t('clientAddedBadge')}</span>}
                       </div>
-                      <div className="uply-mono" style={{ fontSize: 10, color: '#8A938A' }}>{p.category} · {p.unit} · {p.price}€ · {p.supplier}</div>
+                      <div className="uply-mono" style={{ fontSize: 10, color: '#8A938A' }}>
+                        {p.category} · {p.unit} · {p.price}€ · {p.supplier}{p.supplier_ref ? ` (${p.supplier_ref})` : ''}
+                      </div>
                     </div>
                     <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                       <button onClick={() => setDetailProduct(p)} title={t('viewDetails')} style={{ background: 'none', border: '1px solid #CBD3CB', borderRadius: 4, padding: 6, color: '#0D0F0D' }}><Info size={13} /></button>

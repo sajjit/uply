@@ -51,6 +51,7 @@ export default function AdminPlaceOrder({ restaurants, products, categories, pro
     const restaurant = restaurants.find((r) => r.id === restaurantId);
     const orderItems = items.map((i) => ({
       productId: i.product.id, name: i.product.name, qty: i.qty, unit: i.product.unit, unitPrice: i.product.price || 0,
+      supplierRef: i.product.supplier_ref,
     }));
     setSubmitting(true);
     const { error } = await api.createOrder(restaurantId, orderItems, profile.id, comment, restaurant?.name, true);

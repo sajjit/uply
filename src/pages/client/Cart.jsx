@@ -3,7 +3,7 @@ import { Inbox, Check } from 'lucide-react';
 import { TopBar, EmptyState, PrimaryButton, Stepper } from '../../components/shared';
 import { useLanguage } from '../../i18n/LanguageContext';
 
-export default function Cart({ cart, products, setQty, onBack, onSubmit, comment, setComment }) {
+export default function Cart({ cart, products, setQty, onBack, onSubmit, comment, setComment, editing, onCancelEdit }) {
   const { t } = useLanguage();
   const items = Object.entries(cart)
     .map(([id, c]) => ({ product: products.find((p) => p.id === id), ...c }))
@@ -13,8 +13,13 @@ export default function Cart({ cart, products, setQty, onBack, onSubmit, comment
 
   return (
     <div>
-      <TopBar title={t('cart')} onBack={onBack} />
+      <TopBar title={editing ? t('editOrderTitle') : t('cart')} onBack={onBack} />
       <div style={{ padding: 16, maxWidth: 480, margin: '0 auto', paddingBottom: 160 }}>
+        {editing && (
+          <button onClick={onCancelEdit} style={{ width: '100%', marginBottom: 14, background: 'none', border: '1px dashed #8A938A', borderRadius: 6, padding: 10, fontSize: 12, color: '#576257' }}>
+            {t('cancelEditOrder')}
+          </button>
+        )}
         {items.length === 0 ? (
           <EmptyState icon={<Inbox size={32} />} title={t('emptyCart')} />
         ) : (
@@ -59,7 +64,7 @@ export default function Cart({ cart, products, setQty, onBack, onSubmit, comment
               <span className="uply-mono" style={{ fontSize: 12, color: '#576257' }}>{t('itemCount', { count: itemCount })}</span>
               <span className="uply-display" style={{ fontSize: 18, fontWeight: 700 }}>{t('total')} : {total.toFixed(2)} €</span>
             </div>
-            <PrimaryButton onClick={onSubmit}><Check size={16} /> {t('placeOrder')}</PrimaryButton>
+            <PrimaryButton onClick={onSubmit}><Check size={16} /> {editing ? t('saveOrderChanges') : t('placeOrder')}</PrimaryButton>
           </div>
         </div>
       )}

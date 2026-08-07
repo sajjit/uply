@@ -37,6 +37,7 @@ export async function createOrder(restaurantId, items, userId, comment = '', res
     qty: it.qty,
     comment: it.comment || '',
     unit_price: it.unitPrice || 0,
+    supplier_ref: it.supplierRef || null,
   }));
   const { error: itemsError } = await supabase.from('order_items').insert(orderItems);
   if (!itemsError) {
@@ -47,6 +48,38 @@ export async function createOrder(restaurantId, items, userId, comment = '', res
     }
   }
   return { error: itemsError, data: order };
+}
+
+/**
+ * Lets a client edit their own order while it's still "En attente" — replaces
+ * the item list and updates the general comment. RLS only allows this while
+ * the order hasn't moved to "En préparation" yet (see migration-v21), so a
+ * write attempted after the admin locks it in simply fails silently there.
+ */
+export async function updateOrderItems(orderId, items, comment, restaurantName) {
+  const { error: deleteError } = await supabase.from('order_items').delete().eq('order_id', orderId);
+  if (deleteError) return { error: deleteError };
+
+  const orderItems = items.map((it) => ({
+    order_id: orderId,
+    product_id: it.productId,
+    name: it.name,
+    unit: it.unit,
+    qty: it.qty,
+    comment: it.comment || '',
+    unit_price: it.unitPrice || 0,
+    supplier_ref: it.supplierRef || null,
+  }));
+  const { error: insertError } = orderItems.length
+    ? await supabase.from('order_items').insert(orderItems)
+    : { error: null };
+  if (insertError) return { error: insertError };
+
+  const { error: commentError } = await supabase.from('orders').update({ comment }).eq('id', orderId);
+  if (!commentError) {
+    await notifyAdmins(`${restaurantName || 'Un restaurant'} a modifié sa commande.`);
+  }
+  return { error: commentError };
 }
 
 // Best-effort email alert (via the notify-order Edge Function / Resend) —
@@ -76,14 +109,44 @@ async function blobToBase64(blob) {
 export async function updateOrderStatus(orderId, status, restaurantId) {
   const { error } = await supabase.from('orders').update({ status }).eq('id', orderId);
   if (!error && restaurantId) {
-    const messages = {
-      'En préparation': 'Votre commande est en préparation.',
-      'En livraison': 'Votre commande est en cours de livraison.',
-      'Livrée': 'Votre commande est livrée.',
-    };
-    if (messages[status]) await notifyRestaurant(restaurantId, messages[status]);
+    if (status === 'Livrée') {
+      await notifyRestaurant(restaurantId, await buildDeliveryRecap(orderId));
+    } else {
+      const messages = {
+        'En préparation': 'Votre commande est en préparation.',
+        'En livraison': 'Votre commande est en cours de livraison.',
+      };
+      if (messages[status]) await notifyRestaurant(restaurantId, messages[status]);
+    }
   }
   return { error };
+}
+
+// Builds a text summary of what was actually delivered vs. ordered, based on
+// the prepared/delivered_qty state set on the admin's prep checklist —
+// delivered items, out-of-stock ones, and any quantity changes.
+async function buildDeliveryRecap(orderId) {
+  const { data: items } = await supabase
+    .from('order_items')
+    .select('name, qty, unit, prepared, delivered_qty')
+    .eq('order_id', orderId);
+
+  const rows = items || [];
+  const delivered = rows.filter((i) => i.prepared);
+  const outOfStock = rows.filter((i) => !i.prepared);
+  const changed = delivered.filter((i) => i.delivered_qty != null && i.delivered_qty !== i.qty);
+
+  let msg = 'Votre commande est livrée.';
+  if (delivered.length) {
+    msg += `\n✅ Livré : ${delivered.map((i) => `${i.name} (${i.delivered_qty ?? i.qty} ${i.unit || ''})`).join(', ')}`;
+  }
+  if (changed.length) {
+    msg += `\n✏️ Quantité modifiée : ${changed.map((i) => `${i.name} (commandé ${i.qty}, livré ${i.delivered_qty})`).join(', ')}`;
+  }
+  if (outOfStock.length) {
+    msg += `\n❌ En rupture : ${outOfStock.map((i) => i.name).join(', ')}`;
+  }
+  return msg;
 }
 
 export async function deleteOrder(orderId) {
@@ -93,6 +156,11 @@ export async function deleteOrder(orderId) {
 
 export async function setOrderItemPrepared(itemId, prepared) {
   const { error } = await supabase.from('order_items').update({ prepared }).eq('id', itemId);
+  return { error };
+}
+
+export async function setOrderItemDeliveredQty(itemId, deliveredQty) {
+  const { error } = await supabase.from('order_items').update({ delivered_qty: deliveredQty }).eq('id', itemId);
   return { error };
 }
 

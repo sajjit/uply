@@ -75,19 +75,20 @@ function drawHeader(page, font, fontBold, { docTitle, docNumber, dateLabel, rest
 }
 
 // Draws the table header row (column labels on the dark bar) at the given y.
-function drawTableHeaderRow(page, font, fontBold, y, { colName, colQty, colUnit, colPrice, showPrice }) {
+function drawTableHeaderRow(page, font, fontBold, y, { colName, colQty, colUnit, colPrice, showPrice, showRef }) {
   page.drawRectangle({ x: MARGIN, y: y - 4, width: PAGE_WIDTH - MARGIN * 2, height: 22, color: rgb(0.10, 0.11, 0.10) });
   page.drawText('Produit', { x: colName + 4, y: y + 2, size: 9, font: fontBold, color: rgb(1, 1, 1) });
   page.drawText('Qté', { x: colQty, y: y + 2, size: 9, font: fontBold, color: rgb(1, 1, 1) });
   page.drawText('Unité', { x: colUnit, y: y + 2, size: 9, font: fontBold, color: rgb(1, 1, 1) });
   if (showPrice) page.drawText('Prix', { x: colPrice, y: y + 2, size: 9, font: fontBold, color: rgb(1, 1, 1) });
+  else if (showRef) page.drawText('Réf. fournisseur', { x: colPrice, y: y + 2, size: 9, font: fontBold, color: rgb(1, 1, 1) });
 }
 
 // Draws the item rows, flowing onto additional pages (with a repeated header)
 // whenever the current page runs out of room, instead of silently truncating.
-function drawLineItemsTable(pdfDoc, page, font, fontBold, items, startY, { showPrice }) {
+function drawLineItemsTable(pdfDoc, page, font, fontBold, items, startY, { showPrice, showRef }) {
   let y = startY;
-  const cols = { colName: MARGIN, colQty: 330, colUnit: 390, colPrice: showPrice ? 460 : null, showPrice };
+  const cols = { colName: MARGIN, colQty: 330, colUnit: 390, colPrice: (showPrice || showRef) ? 460 : null, showPrice, showRef };
   let currentPage = page;
 
   drawTableHeaderRow(currentPage, font, fontBold, y, cols);
@@ -110,6 +111,8 @@ function drawLineItemsTable(pdfDoc, page, font, fontBold, items, startY, { showP
       const lineTotal = (item.qty || 0) * (item.unitPrice || 0);
       total += lineTotal;
       currentPage.drawText(`${lineTotal.toFixed(2)} €`, { x: cols.colPrice, y: y, size: 9, font, color: rgb(0.1, 0.1, 0.1) });
+    } else if (showRef && item.supplierRef) {
+      currentPage.drawText(String(item.supplierRef).slice(0, 20), { x: cols.colPrice, y: y, size: 9, font, color: rgb(0.1, 0.1, 0.1) });
     }
     y -= 22;
   }
@@ -180,8 +183,8 @@ export async function generatePurchaseOrderPdf(order, restaurant) {
   });
 
   y -= 10;
-  const items = (order.order_items || []).map((it) => ({ name: it.name, qty: it.qty, unit: it.unit }));
-  const { page: lastPage, y: afterTable } = drawLineItemsTable(pdfDoc, page, font, fontBold, items, y, { showPrice: false });
+  const items = (order.order_items || []).map((it) => ({ name: it.name, qty: it.qty, unit: it.unit, supplierRef: it.supplier_ref }));
+  const { page: lastPage, y: afterTable } = drawLineItemsTable(pdfDoc, page, font, fontBold, items, y, { showPrice: false, showRef: true });
 
   let finalY = afterTable - 10;
   if (order.delivery_date) {

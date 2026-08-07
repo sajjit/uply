@@ -17,7 +17,7 @@ export async function fetchProducts(restaurantId = null) {
  * (no admin approval needed) — the admin still gets notified so they can set
  * a real price/category/supplier, since it's created as a placeholder.
  */
-export async function selfAddProduct(restaurantId, name, comment, restaurantName) {
+export async function selfAddProduct(restaurantId, name, comment, restaurantName, userId) {
   const { data, error } = await createProduct({
     restaurant_id: restaurantId,
     name,
@@ -28,6 +28,7 @@ export async function selfAddProduct(restaurantId, name, comment, restaurantName
     photo: '📦',
     active: true,
     in_stock: true,
+    created_by: userId || null,
   });
   if (!error) {
     const suffix = comment ? ` (${comment})` : '';

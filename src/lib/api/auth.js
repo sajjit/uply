@@ -76,6 +76,34 @@ export async function fetchUsers() {
   return { data: data || [], error };
 }
 
+/** Edits a client's name/restaurant assignment — a plain profile update,
+ * covered by the existing "admins can update any profile" RLS policy. */
+export async function updateUser(id, updates) {
+  const { error } = await supabase.from('profiles').update(updates).eq('id', id);
+  return { error };
+}
+
+/** Permanently deletes a client login via the admin-delete-user Edge Function
+ * (Supabase Admin API, service-role key) — removes the auth.users row, which
+ * cascades to the profile automatically. Not reversible. */
+export async function deleteUser(userId) {
+  const { data, error } = await supabase.functions.invoke('admin-delete-user', {
+    body: { userId },
+  });
+  if (error) {
+    let message = error.message;
+    try {
+      const body = await error.context.json();
+      if (body?.error) message = body.error;
+    } catch {
+      // fall back to the generic error.message above
+    }
+    return { error: message };
+  }
+  if (data && data.error) return { error: data.error };
+  return { error: null };
+}
+
 /** Invites a client account by email via the admin-create-user Edge Function
  * (Supabase Admin API, service-role key, server-side only). No password is
  * set by the admin — Supabase sends a real invite email, and the recipient
