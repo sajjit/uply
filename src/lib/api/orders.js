@@ -7,10 +7,17 @@ import { generatePurchaseOrderPdf } from '../pdf/generatePdf';
    ============================================================ */
 
 export async function fetchOrders(restaurantId = null) {
+  // order_items has no natural sequence column (uuid primary key), so without
+  // an explicit order the rows can come back in a different position after
+  // any update to the row (Postgres doesn't guarantee physical row order) —
+  // that showed up as an item's line "jumping" position whenever its
+  // delivered qty was changed. Ordering by created_at keeps it stable.
   let query = supabase
     .from('orders')
-    .select('*, order_items(*)')
-    .order('created_at', { ascending: false });
+    .select('*, order_items(*, products(supplier_ref))')
+    .order('created_at', { ascending: false })
+    .order('created_at', { referencedTable: 'order_items', ascending: true })
+    .order('id', { referencedTable: 'order_items', ascending: true });
   if (restaurantId) query = query.eq('restaurant_id', restaurantId);
   const { data, error } = await query;
   return { data: data || [], error };

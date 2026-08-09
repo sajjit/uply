@@ -183,7 +183,10 @@ export async function generatePurchaseOrderPdf(order, restaurant) {
   });
 
   y -= 10;
-  const items = (order.order_items || []).map((it) => ({ name: it.name, qty: it.qty, unit: it.unit, supplierRef: it.supplier_ref }));
+  // Fall back to the product's current supplier_ref when the order_item's own
+  // snapshot is empty — happens when the ref was added to the product after
+  // the order was already placed.
+  const items = (order.order_items || []).map((it) => ({ name: it.name, qty: it.qty, unit: it.unit, supplierRef: it.supplier_ref || it.products?.supplier_ref }));
   const { page: lastPage, y: afterTable } = drawLineItemsTable(pdfDoc, page, font, fontBold, items, y, { showPrice: false, showRef: true });
 
   let finalY = afterTable - 10;
@@ -224,8 +227,15 @@ export async function generateDeliveryNotePdf(order, restaurant) {
   });
 
   y -= 10;
-  const items = (order.order_items || []).map((it) => ({ name: it.name, qty: it.qty, unit: it.unit }));
-  const { page: lastPage, y: afterTable } = drawLineItemsTable(pdfDoc, page, font, fontBold, items, y, { showPrice: false });
+  // Show what was actually delivered (delivered_qty), not what was originally
+  // ordered — falls back to qty for items never adjusted on the prep checklist.
+  const items = (order.order_items || []).map((it) => ({
+    name: it.name,
+    qty: it.delivered_qty ?? it.qty,
+    unit: it.unit,
+    supplierRef: it.supplier_ref || it.products?.supplier_ref,
+  }));
+  const { page: lastPage, y: afterTable } = drawLineItemsTable(pdfDoc, page, font, fontBold, items, y, { showPrice: false, showRef: true });
 
   let finalY = afterTable - 30;
   lastPage.drawText('Signature du destinataire :', { x: MARGIN, y: finalY, size: 9, font: fontBold, color: rgb(0.3, 0.3, 0.3) });
