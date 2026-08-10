@@ -10,7 +10,7 @@ export default function ImportInvoiceModal({ restaurants, products, categories, 
   const [supplier, setSupplier] = useState('');
   const [invoiceNumber, setInvoiceNumber] = useState('');
   const defaultCategory = categories?.[0]?.name || '';
-  const [rows, setRows] = useState([{ name: '', category: defaultCategory, unit: 'kg', price: '' }]);
+  const [rows, setRows] = useState([{ name: '', category: defaultCategory, unit: 'kg', price: '', supplierRef: '' }]);
   const [busy, setBusy] = useState(false);
   const [reviewing, setReviewing] = useState(false);
 
@@ -19,7 +19,7 @@ export default function ImportInvoiceModal({ restaurants, products, categories, 
   }
 
   function addRow() {
-    setRows((prev) => [...prev, { name: '', category: defaultCategory, unit: 'kg', price: '' }]);
+    setRows((prev) => [...prev, { name: '', category: defaultCategory, unit: 'kg', price: '', supplierRef: '' }]);
   }
 
   function removeRow(i) {
@@ -48,6 +48,7 @@ export default function ImportInvoiceModal({ restaurants, products, categories, 
           category: r.category.trim() || match.category,
           unit: r.unit.trim() || match.unit,
           supplier: supplier.trim() || match.supplier,
+          supplier_ref: r.supplierRef.trim() || match.supplier_ref,
           price: r.price ? parseFloat(r.price) : match.price,
         });
       } else if (match && decision === 'ignore') {
@@ -59,6 +60,7 @@ export default function ImportInvoiceModal({ restaurants, products, categories, 
           category: r.category.trim() || 'Non classé',
           unit: r.unit.trim() || 'unité',
           supplier: supplier.trim() || '—',
+          supplier_ref: r.supplierRef.trim() || null,
           price: parseFloat(r.price) || 0,
           photo: '📦',
           active: true,
@@ -114,6 +116,7 @@ export default function ImportInvoiceModal({ restaurants, products, categories, 
               </select>
               <input placeholder={t('unit')} value={row.unit} onChange={(e) => updateRow(i, 'unit', e.target.value)} style={{ ...inputStyle, flex: '0 1 60px' }} />
               <input placeholder={t('price')} type="number" value={row.price} onChange={(e) => updateRow(i, 'price', e.target.value)} style={{ ...inputStyle, flex: '0 1 70px' }} />
+              <input placeholder={t('supplierRef')} value={row.supplierRef} onChange={(e) => updateRow(i, 'supplierRef', e.target.value)} style={{ ...inputStyle, flex: '1 1 90px' }} />
               <button onClick={() => removeRow(i)} style={{ background: 'none', border: 'none', color: '#C0392B', padding: 4, flexShrink: 0 }}><Trash2 size={14} /></button>
             </div>
           ))}
