@@ -94,11 +94,10 @@ export async function updateOrderItems(orderId, items, comment, restaurantName) 
 // so the admin has it immediately without opening the app.
 async function notifyOrderEmail(order, restaurantName, items) {
   try {
-    const itemsSummary = items.map((it) => `${it.name} (${it.qty} ${it.unit || ''})`).join('<br/>');
     const pdfBlob = await generatePurchaseOrderPdf({ ...order, order_items: items }, { name: restaurantName });
     const pdfBase64 = await blobToBase64(pdfBlob);
     await supabase.functions.invoke('notify-order', {
-      body: { orderId: order.id, restaurantName, itemsSummary, pdfBase64 },
+      body: { orderId: order.id, pdfBase64 },
     });
   } catch {
     // ignore — email delivery is not critical to placing the order

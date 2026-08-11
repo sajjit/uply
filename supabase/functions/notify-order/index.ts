@@ -25,6 +25,15 @@ function jsonResponse(body, status = 200) {
   });
 }
 
+// Prevents HTML/content injection from any text that ends up in the email —
+// item and restaurant names are user-generated content (clients can name a
+// self-added product anything), so this always runs even on DB-sourced values.
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, (c) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+  }[c]));
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
@@ -40,8 +49,11 @@ Deno.serve(async (req) => {
     const anonKey = Deno.env.get('SUPABASE_ANON_KEY');
     const resendApiKey = Deno.env.get('RESEND_API_KEY');
 
-    // Just confirm the caller is logged in — this only ever fires from the
-    // app's own order-creation flow, no admin check needed.
+    // Scoped to the caller's own session (not service role) — RLS means a
+    // client can only ever look up an order belonging to their own
+    // restaurant, an admin can look up any. This is what stops a caller
+    // from forging a notification for an order that isn't theirs (or
+    // doesn't exist), instead of trusting whatever text they send us.
     const callerClient = createClient(supabaseUrl, anonKey, {
       global: { headers: { Authorization: authHeader } },
     });
@@ -50,15 +62,33 @@ Deno.serve(async (req) => {
       return jsonResponse({ error: 'Session invalide.' }, 401);
     }
 
-    const { restaurantName, itemsSummary, orderId, pdfBase64 } = await req.json();
+    const { orderId, pdfBase64 } = await req.json();
+    if (!orderId) {
+      return jsonResponse({ error: 'Identifiant de commande requis.' }, 400);
+    }
+
+    const { data: order, error: orderError } = await callerClient
+      .from('orders')
+      .select('id, order_items(name, qty, unit), restaurants(name)')
+      .eq('id', orderId)
+      .single();
+
+    if (orderError || !order) {
+      return jsonResponse({ error: 'Commande introuvable.' }, 404);
+    }
+
+    const restaurantName = order.restaurants?.name || 'Restaurant';
+    const itemsSummary = (order.order_items || [])
+      .map((it) => `${escapeHtml(it.name)} (${escapeHtml(it.qty)} ${escapeHtml(it.unit || '')})`)
+      .join('<br/>');
 
     const html = `
       <div style="font-family: sans-serif; color: #0D0F0D;">
         <h2 style="margin-bottom: 4px;">Nouvelle commande reçue</h2>
-        <p style="margin: 4px 0;"><strong>Restaurant :</strong> ${restaurantName || 'N/A'}</p>
-        <p style="margin: 4px 0;"><strong>N° commande :</strong> ${orderId ? String(orderId).slice(0, 8).toUpperCase() : ''}</p>
+        <p style="margin: 4px 0;"><strong>Restaurant :</strong> ${escapeHtml(restaurantName)}</p>
+        <p style="margin: 4px 0;"><strong>N° commande :</strong> ${escapeHtml(String(order.id).slice(0, 8).toUpperCase())}</p>
         <p style="margin: 12px 0 4px;"><strong>Produits :</strong></p>
-        <p style="margin: 0;">${itemsSummary || ''}</p>
+        <p style="margin: 0;">${itemsSummary}</p>
         <p style="color:#8A938A; font-size:12px; margin-top:24px;">Notification automatique Uply</p>
       </div>
     `;
@@ -66,7 +96,7 @@ Deno.serve(async (req) => {
     const emailPayload = {
       from: 'Uply <onboarding@resend.dev>',
       to: [NOTIFY_EMAIL],
-      subject: `Nouvelle commande — ${restaurantName || 'Restaurant'}`,
+      subject: `Nouvelle commande — ${restaurantName}`,
       html,
     };
     if (pdfBase64) {
