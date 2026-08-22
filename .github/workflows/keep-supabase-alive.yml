@@ -1,0 +1,31 @@
+name: Keep Supabase projects active
+
+# Supabase free-tier projects auto-pause after 7 days with no API activity.
+# This pings both the production and staging projects every 3 days so
+# neither one ever goes quiet long enough to pause, regardless of real
+# client traffic.
+
+on:
+  schedule:
+    - cron: "0 6 */3 * *"
+  workflow_dispatch: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      # A 401 here is expected and fine — it means the anon role correctly
+      # has no SELECT grant on this table (see "defense in depth" security
+      # hardening). The request still reaches Postgres and counts as real
+      # activity, which is all that's needed to reset the pause timer.
+      - name: Ping production Supabase
+        run: |
+          curl -sS -o /dev/null -w "production: %{http_code}\n" \
+            -H "apikey: sb_publishable_Tq3mBcgHtZeja0Uln4bglg_HN92FXF1" \
+            "https://pshdavkhanvulttsnygx.supabase.co/rest/v1/restaurants?select=id&limit=1"
+
+      - name: Ping staging Supabase
+        run: |
+          curl -sS -o /dev/null -w "staging: %{http_code}\n" \
+            -H "apikey: sb_publishable_W_elcZ6NzWX5g7Z6ajNumg_D-03S1UT" \
+            "https://nlhnuvhbfhfblotfjbic.supabase.co/rest/v1/restaurants?select=id&limit=1"
