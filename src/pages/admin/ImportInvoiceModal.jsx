@@ -3,6 +3,7 @@ import { X, Plus, Trash2 } from 'lucide-react';
 import * as api from '../../lib/api';
 import { PrimaryButton, inputStyle } from '../../components/shared';
 import { useLanguage } from '../../i18n/LanguageContext';
+import { findExistingProduct } from '../../lib/logic/productMatch';
 
 export default function ImportInvoiceModal({ restaurants, products, categories, onClose, onDone }) {
   const { t } = useLanguage();
@@ -27,8 +28,7 @@ export default function ImportInvoiceModal({ restaurants, products, categories, 
   }
 
   function existingMatch(name) {
-    const restaurantProducts = products.filter((p) => p.restaurant_id === restaurantId);
-    return restaurantProducts.find((p) => p.name.trim().toLowerCase() === name.trim().toLowerCase());
+    return findExistingProduct(products, restaurantId, name);
   }
 
   function goToReview() {

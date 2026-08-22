@@ -1,6 +1,8 @@
 import { supabase } from '../supabaseClient';
 import { notifyRestaurant, notifyAdmins } from './notifications';
 import { generatePurchaseOrderPdf } from '../pdf/generatePdf';
+import { buildDeliveryRecapMessage } from '../logic/deliveryRecap';
+import { computeAdminStats } from '../logic/adminStats';
 
 /* ============================================================
    Orders & order items
@@ -128,31 +130,15 @@ export async function updateOrderStatus(orderId, status, restaurantId) {
   return { error };
 }
 
-// Builds a text summary of what was actually delivered vs. ordered, based on
-// the prepared/delivered_qty state set on the admin's prep checklist —
-// delivered items, out-of-stock ones, and any quantity changes.
+// Fetches the delivered order's items and formats the recap message sent to
+// the restaurant (the actual formatting logic lives in logic/deliveryRecap.js
+// so it can be unit tested without a database round trip).
 async function buildDeliveryRecap(orderId) {
   const { data: items } = await supabase
     .from('order_items')
     .select('name, qty, unit, prepared, delivered_qty')
     .eq('order_id', orderId);
-
-  const rows = items || [];
-  const delivered = rows.filter((i) => i.prepared);
-  const outOfStock = rows.filter((i) => !i.prepared);
-  const changed = delivered.filter((i) => i.delivered_qty != null && i.delivered_qty !== i.qty);
-
-  let msg = 'Votre commande est livrée.';
-  if (delivered.length) {
-    msg += `\n✅ Livré : ${delivered.map((i) => `${i.name} (${i.delivered_qty ?? i.qty} ${i.unit || ''})`).join(', ')}`;
-  }
-  if (changed.length) {
-    msg += `\n✏️ Quantité modifiée : ${changed.map((i) => `${i.name} (commandé ${i.qty}, livré ${i.delivered_qty})`).join(', ')}`;
-  }
-  if (outOfStock.length) {
-    msg += `\n❌ En rupture : ${outOfStock.map((i) => i.name).join(', ')}`;
-  }
-  return msg;
+  return buildDeliveryRecapMessage(items);
 }
 
 export async function deleteOrder(orderId) {
@@ -209,47 +195,5 @@ export async function fetchAdminStats() {
   const { data: orders } = await supabase.from('orders').select('id, restaurant_id, status, created_at');
   const { data: restaurants } = await supabase.from('restaurants').select('id, name');
 
-  const productCounts = {};
-  const supplierSpend = {};
-  for (const it of orderItems || []) {
-    if (it.name) productCounts[it.name] = (productCounts[it.name] || 0) + 1;
-    const supplierName = it.products?.supplier || 'Non renseigné';
-    const lineTotal = (it.qty || 0) * (it.unit_price || 0);
-    supplierSpend[supplierName] = (supplierSpend[supplierName] || 0) + lineTotal;
-  }
-  const topProducts = Object.entries(productCounts)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 5)
-    .map(([name, count]) => ({ name, count }));
-  const spendBySupplier = Object.entries(supplierSpend)
-    .sort((a, b) => b[1] - a[1])
-    .map(([supplier, total]) => ({ supplier, total }));
-
-  const restaurantNames = {};
-  for (const r of restaurants || []) restaurantNames[r.id] = r.name;
-  const restaurantCounts = {};
-  for (const o of orders || []) {
-    const name = restaurantNames[o.restaurant_id] || '—';
-    restaurantCounts[name] = (restaurantCounts[name] || 0) + 1;
-  }
-  const ordersByRestaurant = Object.entries(restaurantCounts)
-    .sort((a, b) => b[1] - a[1])
-    .map(([name, count]) => ({ name, count }));
-
-  const now = new Date();
-  const thisMonth = (orders || []).filter((o) => {
-    const d = new Date(o.created_at);
-    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
-  });
-
-  return {
-    data: {
-      totalOrders: (orders || []).length,
-      ordersThisMonth: thisMonth.length,
-      topProducts,
-      ordersByRestaurant,
-      spendBySupplier,
-    },
-    error: null,
-  };
+  return { data: computeAdminStats(orderItems, orders, restaurants), error: null };
 }
