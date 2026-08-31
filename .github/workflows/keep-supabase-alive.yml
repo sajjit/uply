@@ -1,9 +1,15 @@
 name: Keep Supabase projects active
 
 # Supabase free-tier projects auto-pause after 7 days with no API activity.
-# This pings both the production and staging projects every 3 days so
-# neither one ever goes quiet long enough to pause, regardless of real
-# client traffic.
+# This calls a lightweight health-check RPC (see migration-v26.sql) on both
+# the production and staging projects every 3 days so neither one ever goes
+# quiet long enough to pause, regardless of real client traffic.
+#
+# IMPORTANT: this must get a genuine 2xx response to count as activity —
+# earlier versions hit a table anon has no SELECT grant on, which Supabase's
+# pause detector silently did NOT count despite the request reaching
+# Postgres. Each step below fails the job on anything but 200, so a future
+# regression shows up as a red workflow run instead of a surprise pause email.
 
 on:
   schedule:
@@ -14,18 +20,16 @@ jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
-      # A 401 here is expected and fine — it means the anon role correctly
-      # has no SELECT grant on this table (see "defense in depth" security
-      # hardening). The request still reaches Postgres and counts as real
-      # activity, which is all that's needed to reset the pause timer.
       - name: Ping production Supabase
         run: |
-          curl -sS -o /dev/null -w "production: %{http_code}\n" \
+          curl -sS -f -X POST -o /dev/null -w "production: %{http_code}\n" \
             -H "apikey: sb_publishable_Tq3mBcgHtZeja0Uln4bglg_HN92FXF1" \
-            "https://pshdavkhanvulttsnygx.supabase.co/rest/v1/restaurants?select=id&limit=1"
+            -H "Content-Type: application/json" \
+            "https://pshdavkhanvulttsnygx.supabase.co/rest/v1/rpc/ping"
 
       - name: Ping staging Supabase
         run: |
-          curl -sS -o /dev/null -w "staging: %{http_code}\n" \
+          curl -sS -f -X POST -o /dev/null -w "staging: %{http_code}\n" \
             -H "apikey: sb_publishable_W_elcZ6NzWX5g7Z6ajNumg_D-03S1UT" \
-            "https://nlhnuvhbfhfblotfjbic.supabase.co/rest/v1/restaurants?select=id&limit=1"
+            -H "Content-Type: application/json" \
+            "https://nlhnuvhbfhfblotfjbic.supabase.co/rest/v1/rpc/ping"
