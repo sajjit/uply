@@ -1,19 +1,24 @@
 name: Keep Supabase projects active
 
-# Supabase free-tier projects auto-pause after 7 days with no API activity.
-# This calls a lightweight health-check RPC (see migration-v26.sql) on both
-# the production and staging projects every 3 days so neither one ever goes
-# quiet long enough to pause, regardless of real client traffic.
+# Supabase free-tier projects are paused when they don't get enough user
+# database activity over a week. Their docs say "a few user requests to the
+# database each day" is typically enough — so this calls a lightweight
+# health-check RPC (see migration-v26.sql) several times, twice a day, on
+# both the production and staging projects.
 #
-# IMPORTANT: this must get a genuine 2xx response to count as activity —
-# earlier versions hit a table anon has no SELECT grant on, which Supabase's
-# pause detector silently did NOT count despite the request reaching
-# Postgres. Each step below fails the job on anything but 200, so a future
-# regression shows up as a red workflow run instead of a surprise pause email.
+# History: a single ping every 3 days was NOT enough. uply-staging paused
+# twice that way — once while the ping hit a table anon can't read (401),
+# and again after switching to the 200-returning ping() RPC. Whether this
+# frequency is enough is only proven once a project stays up for 7+ days.
+#
+# Production is the one that matters: a failed ping there fails the run
+# (and emails you). Staging is best-effort — a paused project can't be woken
+# by a ping, so an unreachable staging only raises a warning annotation.
+# Resume it from the Supabase dashboard when you next need it.
 
 on:
   schedule:
-    - cron: "0 6 */3 * *"
+    - cron: "0 6,18 * * *"
   workflow_dispatch: {}
 
 jobs:
@@ -22,14 +27,23 @@ jobs:
     steps:
       - name: Ping production Supabase
         run: |
-          curl -sS -f -X POST -o /dev/null -w "production: %{http_code}\n" \
-            -H "apikey: sb_publishable_Tq3mBcgHtZeja0Uln4bglg_HN92FXF1" \
-            -H "Content-Type: application/json" \
-            "https://pshdavkhanvulttsnygx.supabase.co/rest/v1/rpc/ping"
+          for i in 1 2 3; do
+            curl -sS -f -X POST -o /dev/null -w "production ping $i: %{http_code}\n" \
+              -H "apikey: sb_publishable_Tq3mBcgHtZeja0Uln4bglg_HN92FXF1" \
+              -H "Content-Type: application/json" \
+              "https://pshdavkhanvulttsnygx.supabase.co/rest/v1/rpc/ping"
+            sleep 2
+          done
 
       - name: Ping staging Supabase
         run: |
-          curl -sS -f -X POST -o /dev/null -w "staging: %{http_code}\n" \
-            -H "apikey: sb_publishable_W_elcZ6NzWX5g7Z6ajNumg_D-03S1UT" \
-            -H "Content-Type: application/json" \
-            "https://nlhnuvhbfhfblotfjbic.supabase.co/rest/v1/rpc/ping"
+          for i in 1 2 3; do
+            if ! curl -sS -f -X POST -o /dev/null -w "staging ping $i: %{http_code}\n" \
+              -H "apikey: sb_publishable_W_elcZ6NzWX5g7Z6ajNumg_D-03S1UT" \
+              -H "Content-Type: application/json" \
+              "https://nlhnuvhbfhfblotfjbic.supabase.co/rest/v1/rpc/ping"; then
+              echo "::warning::Staging Supabase ping failed - it is probably paused (resume it in the Supabase dashboard) or the ping() function is missing."
+              exit 0
+            fi
+            sleep 2
+          done
